@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="problem-graph.css">
+    <script src="problem-graph.js"></script>
+</head>
+<body>
+
+<span id="contest-id" style="display: none">zYz839LpfaXC99</span>
+
+<div class="problem">
+    <div class="menu">
+        <span>GRAPH</span>
+        <p id="tsk">Задачи</p>
+        <p id="act">Справка</p>
+        <p id="prg" >О программе</p>
+    </div>
+    <div class="main">
+        <div class="cnv-blck">
+            <canvas id="cnv"></canvas>
+            <input type="text" id="data" title="" value="">
+            <div class="statistic">
+                <p class="points">Количество вершин: <span></span></p>
+                <p class="path">Количество ребер: <span></span></p>
+            </div>
+        </div>
+        <div class="menu-info">
+            <div class="task-text">
+                <span>Задача</span>
+                <p>Постройте плоский граф с 17 рёбрами и 8 вершинами и минимальным числом компонент связности</p>
+            </div>
+            <div class="tasks hiden">
+                <span>Конструктор задач</span>
+                <div class="task-lst">
+                    <div class="val">
+                        <label data-title="Числовой параметр" for="">Вершины (<i>число</i>)</label>
+                        <input type="text" class="value-for-task">
+
+                    </div>
+                    <div class="val">
+                        <label data-title="Числовой параметр" for="">Ребра (<i>число</i>)</label>
+                        <input type="text" class="value-for-task">
+                    </div>
+                    <div class="val">
+                        <label data-title="Числовой параметр" for="">Компоненты связности (<i>число</i>)</label>
+                        <input type="text" class="value-for-task">
+                    </div>
+                    <div class="val">
+                        <label data-title="Числовой параметр" for="">Хроматическое число (<i>число</i>)</label>
+                        <input type="text" class="value-for-task">
+                    </div>
+                    <div class="val">
+                        <label data-title="Числовой параметр" for="">Плоский</label>
+                        <input type="checkbox">
+                    </div>
+                    <div class="val">
+                        <label data-title="Числовой параметр" for="">Двудольный</label>
+                        <input type="checkbox">
+                    </div>
+                    <div class="val">
+                        <label data-title="Числовой параметр" for="">Регулярный</label>
+                        <input type="checkbox">
+                    </div>
+                </div>
+                <div class="newtask">
+                    <p>Текст новой задачи</p>
+                </div>
+                <input type="button" class="btn-tsk" id="create-task" value="Создать">
+            </div>
+            <div class="actions hiden">
+                <div class="rule">
+                    <p>Создание вершины</p>
+                    <span>Клик ЛКМ по холсту</span>
+                </div>
+                <div class="rule">
+                    <p>Переименовывание вершины</p>
+                    <span>Двойной клик ЛКМ по вершине</span>
+                </div>
+                <div class="rule">
+                    <p>Перемещение выбранной вершины</p>
+                    <span>Клик ЛКМ на вершину + зажатие</span>
+                </div>
+                <div class="rule">
+                    <p>Создание ребра</p>
+                    <span>Клик ЛКМ по 2 произвольным вершинам</span>
+                </div>
+            </div>
+            <div class="programms hiden">
+                <span>О программе</span>
+                <p>Данная программа предоставляет собой манипулятор по работе с графами. Клиент может создавать задачи на графы, прорешивать уже имеющиеся задачи. Интерфейс отличается простотой,
+                    каждой конкретной задаче присвоены определенные действия(нажатия кнопок мыши и прочие).Посмотреть текущие назначения для данной задачи можно в вкладке "Действия".
+                </p>
+            </div>
+
+            <input type="button" class="btn-tsk" id="load-solution" value="Отправить на проверку">
+        </div>
+
+    </div>
+    <!--<div class="interface">
+        <canvas id="cnv"></canvas>
+        <div class="context-menu">
+            <span>Меню</span>
+            <p>Задачи</p>
+            <p>Действия</p>
+            <p>Справка</p>
+            <p>О программе</p>
+        </div>
+    </div>
+    <div class="footer-menu">
+        <div class="task-text">
+            <p><span>Task: </span>Постройте плоский граф с 17 рёбрами и 8 вершинами и минимальным числом компонент связности</p>
+        </div>
+        <button id="load-solution"></button>
+    </div>-->
+</div>
+
+</body>
+</html>

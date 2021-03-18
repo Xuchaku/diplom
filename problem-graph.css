@@ -1,0 +1,250 @@
+
+.problem{
+    background: rgb(47,48,57);
+    border-radius: 7px;
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+    padding: 10px 15px;
+    margin: 40px auto;
+
+
+}
+.menu{
+    display: flex;
+    padding: 0px 10px;
+    flex-direction: row;
+    background: rgb(69,72,82);
+    border-radius: 7px;
+}
+.menu span{
+    font-weight: bold;
+    margin-right: 20px;
+    color: white;
+    padding: 15px 15px;
+    cursor:pointer;
+}
+.menu p{
+    padding: 15px 15px;
+    color: azure;
+    cursor:pointer;
+    margin: 0 0px;
+    transition: 0.2s;
+}
+.menu p:hover{
+    color: azure;
+    cursor:pointer;
+    background: rgb(36,37,43);
+}
+.main{
+    display: flex;
+    flex-direction: row;
+}
+.cnv-blck{
+    padding: 60px 40px;
+    background: rgb(69,72,82);
+    margin-top: 15px;
+    display: flex;
+    position: relative;
+    flex-direction: column;
+    border-radius: 7px;
+}
+#cnv{
+    width: 640px;
+    height: 480px;
+
+    box-sizing: border-box;
+    background: rgb(36,37,43);
+}
+.menu-info{
+    display: flex;
+    flex-direction: column;
+    margin-left: 15px;
+}
+.btn-tsk{
+    background: rgb(42,162,210);
+    outline: none;
+    border: none;
+    border-radius: 2px;
+    color: white;
+    padding: 10px;
+    cursor: pointer;
+}
+.task-text{
+    display: flex;
+    flex-direction: column;
+    margin-top:15px;
+}
+.task-text span{
+    color: rgb(17,228,213);
+    font-weight: bold;
+    background:  rgb(69,72,82);
+    text-align: center;
+    padding: 10px;
+    border-top-right-radius: 7px;
+    border-top-left-radius: 7px;
+}
+.task-text p{
+    color: white;
+
+    background: rgb(36,37,43);
+    margin-top: 0;
+    padding: 10px;
+    border-bottom-right-radius: 7px;
+    border-bottom-left-radius: 7px;
+}
+
+.tasks{
+    border: 2px solid rgb(69,72,82);
+    padding: 5px;
+    border-radius: 7px;
+    margin-bottom: 15px;
+}
+.actions{
+
+}
+.info{
+
+}
+
+.programms{
+    display: flex;
+    flex-direction: column;
+    margin-top:15px;
+}
+.programms span{
+    color: rgb(137,183,26);
+    font-weight: bold;
+    background:  rgb(69,72,82);
+    text-align: center;
+    padding: 10px;
+    border-top-right-radius: 7px;
+    border-top-left-radius: 7px;
+}
+.programms p{
+    color: white;
+
+    background: rgb(36,37,43);
+    margin-top: 0;
+    padding: 10px;
+    border-bottom-right-radius: 7px;
+    border-bottom-left-radius: 7px;
+}
+
+.tasks{
+    display: flex;
+    flex-direction: column;
+
+    margin-top:15px;
+}
+.tasks span{
+    color: rgb(137,183,26);
+    font-weight: bold;
+    background:  rgb(69,72,82);
+    text-align: center;
+    padding: 10px;
+    border-top-right-radius: 7px;
+    border-top-left-radius: 7px;
+}
+.task-lst{
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    margin:15px 0;
+}
+.task-lst label{
+    color: #ccc;
+    text-align: left;
+    font-size: 12px;
+    margin-bottom: 5px;
+
+
+
+
+}
+.task-lst input{
+    background: rgb(36,37,43);
+    color: azure;
+    text-align: center;
+    width: auto;
+    height: 20px;
+    outline: none;
+    border: none;
+    border-bottom: 2px solid rgb(137,183,26);
+
+}
+.task-lst .val{
+    display: flex;
+    padding: 5px;
+    margin: 5px;
+    background: rgb(69,72,82);
+    flex-direction: column;
+    border-radius: 7px;
+    justify-content: center;
+    align-items: center;
+}
+.newtask{
+    background: rgb(69,72,82);
+    border-radius: 7px;
+    margin-bottom: 15px;
+    padding: 5px;
+}
+.newtask p {
+    color: white;
+}
+
+
+
+#data{
+    position: absolute;
+    top:0;
+    display: none;
+    border: none;
+    left:0;
+    border-bottom: 2px solid rgb(137,183,26);
+    width: 20px;
+    background: #ccc;
+}
+.actions{
+    display: flex;
+    flex-direction: column;
+    margin-top:15px;
+    border: 2px solid rgb(69,72,82);
+    border-radius: 7px;
+    padding: 5px 10px;
+    margin-bottom: 15px;
+}
+.actions .rule{
+    background: rgb(36,37,43);
+    border-radius: 7px;
+    margin-bottom: 5px;
+    padding: 5px 10px;
+}
+.actions .rule p{
+    color: white;
+    margin-bottom: 5px;
+    margin-top: 5px;
+}
+.actions .rule span{
+    color: rgb(137,183,26);
+    font-size: 12px;
+}
+.hiden{
+    display: none;
+}
+.cnv-blck .statistic{
+    display: flex;
+    flex-direction: row;
+    color: rgb(137,183,26);
+    padding: 5px 10px;
+    box-sizing: border-box;
+    margin-top: 15px;
+    font-size: 12px;
+}
+.cnv-blck .statistic p{
+    margin: 0 10px;
+}
+.cnv-blck .statistic p span{
+    color: red;
+}
+
