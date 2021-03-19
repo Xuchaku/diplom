@@ -198,12 +198,13 @@
 #data{
     position: absolute;
     top:0;
-    display: none;
+    display: block;
     border: none;
     left:0;
-    border-bottom: 2px solid rgb(137,183,26);
-    width: 20px;
-    background: #ccc;
+    font-size: 10px;
+    border: 1px solid rgb(137,183,26);
+    color: rgb(137,183,26);
+    background: rgb(36,37,43);
 }
 .actions{
     display: flex;
