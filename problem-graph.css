@@ -198,7 +198,7 @@
 #data{
     position: absolute;
     top:0;
-    display: block;
+    display: none;
     border: none;
     left:0;
     font-size: 10px;
@@ -247,5 +247,64 @@
 }
 .cnv-blck .statistic p span{
     color: red;
+}
+#setname{
+    display: none;
+    position: absolute;
+    left: 0;
+    top: 0px;
+    background: rgb(36,37,43);
+    outline: none;
+    border: none;
+    color: rgb(137,183,26);
+    width: 60px;
+    border: 1px solid rgb(137,183,26);
+}
+
+.form_radio_group {
+    display: none;
+    position: absolute;
+    left: 0;
+    top:0;
+    overflow: hidden;
+}
+.form_radio_group-item {
+    display: inline-block;
+    float: left;
+}
+.form_radio_group input[type=radio] {
+    display: none;
+}
+.form_radio_group label {
+    display: inline-block;
+    cursor: pointer;
+    width: 20px;
+    height: 20px;
+    line-height: 34px;
+    border: 1px solid white;
+    border-right: none;
+    user-select: none;
+}
+
+.form_radio_group .form_radio_group-item:first-child label {
+
+}
+.form_radio_group .form_radio_group-item:last-child label {
+
+    border-right: 1px solid white;
+}
+
+/* Checked */
+.form_radio_group input[type=radio]:checked + label {
+
+    border: 1px solid rgb(137,183,26);
+    -webkit-box-shadow: 0px 0px 12px 0px rgba(137, 183, 26, 0.75);
+    -moz-box-shadow:    0px 0px 12px 0px rgba(137, 183, 26, 0.75);
+    box-shadow:         0px 0px 12px 0px rgba(137, 183, 26, 0.75);
+}
+
+/* Hover */
+.form_radio_group label:hover {
+    color: #666;
 }
 
