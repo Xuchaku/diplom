@@ -5,13 +5,51 @@ const DEFAULT_COLOR_CNV = "rgb(36,37,43)";
 let graph;
 let cnv;
 let menu;
+let menuProperty;
+let GLOBAL_STATE = [];
 
 let colors = ["black", "blue", "red", "yellow", "purple"];
-function updateStatistic(props){
+
+class MenuPropertyGraph{
+    constructor() {
+      this.nodesElemCount = document.querySelector("#nodes");
+      this.pathElemCount = document.querySelector("#paths");
+      this.connectElemCount = document.querySelector("#connect-component");
+      this.hromaticElemCount = document.querySelector("#hromatic-number");
+      this.cyclomaticElemCount = document.querySelector("#cyclomatic-number");
+      this.checkedElemTree = document.querySelector("#checkTree");
+      this.checkedElemCycle = document.querySelector("#checkCycle");
+      this.init();
+    }
+    init(){
+        this.nodesElemCount.value = 0;
+        this.pathElemCount.value = 0;
+        this.connectElemCount.value = 0;
+
+    }
+    update(action){
+       switch (action) {
+           case "add":this.nodesElemCount.value = graph.getCountNodes();break;
+           case "delete":this.nodesElemCount.value = graph.getCountNodes();break;
+           case "addPath":this.pathElemCount.value = graph.getCountPath();break;
+           case "deletePath":this.pathElemCount.value = graph.getCountPath();break;
+       }
+        this.connectElemCount.value = graph.getConnectComponentCount();
+        this.cyclomaticElemCount.value = graph.getCyclomaticNumber();
+        this.checkedElemCycle.checked = graph.isCycle();
+        this.checkedElemTree.checked = graph.isTree();
+
+
+
+
+
+
+
+
+    }
 }
-function isClickOnRoad(x,y) {
-}
-class DataInput{
+
+class ContextMenu{
     constructor() {
         this.x = 0;
         this.y = 0;
@@ -40,7 +78,8 @@ class DataInput{
                 this.blocked = false;
                 this.setcolor.style.display = "none";
                 this.targetPoint.isSelected = false;
-                this.targetPoint.color = colors[i];
+                this.targetPoint.setColor(colors[i]);
+               // this.targetPoint.color = colors[i];
             })
         }
         //поле ввода имени
@@ -53,7 +92,7 @@ class DataInput{
                         if(graph.nodeHash[key].name == this.setname.value)
                             return;
                     }
-                    this.targetPoint.name = this.setname.value;
+                    this.targetPoint.setName(this.setname.value);
                     this.setname.style.display = "none";
                     this.targetPoint.isSelected = false;
                     this.blocked = false;
@@ -64,7 +103,6 @@ class DataInput{
             let select = this.elem.value;
 
             if(select == "1"){
-                console.log("HERE");
                 this.setname.value = "";
                 this.targetPoint.isSelected = true;
                 this.mode = 1;
@@ -84,21 +122,8 @@ class DataInput{
                 this.elem.style.display = "none";
             }
             if(select == "3"){
-                let keyDelete = null;
-                for(let key in graph.nodeHash){
-                    if(this.targetPoint == graph.nodeHash[key]){
-                        keyDelete = key;
-                        delete graph.nodeHash[key];
-                    }
-                }
-                //удаление путей
-                for(let key in graph.nodeHash){
-                    for(let i = 0;i<graph.nodeHash[key].roads.length;i++){
-                        if(graph.nodeHash[key].roads[i].to == keyDelete){
-                            graph.nodeHash[key].roads.splice(i, 1);
-                        }
-                    }
-                }
+                graph.deleteNode(this.targetPoint);
+                menuProperty.update("delete");
                 this.mode = 3;
                 this.elem.style.display = "none";
             }
@@ -132,7 +157,6 @@ class DataInput{
     }
 
 }
-
 class CNV {
     constructor() {
         this.cnv = document.querySelector("#cnv");
@@ -173,6 +197,7 @@ class CNV {
                             if(Math.abs(graph.nodeHash[key2].x -x) <= graph.nodeHash[key2].radius &&
                                 Math.abs(graph.nodeHash[key2].y -y) <= graph.nodeHash[key2].radius){
                                 graph.addPath(key, key2);
+                                menuProperty.update("addPath");
                                 graph.nodeHash[key].isSelected = false;
                                 menu.blocked = false;
                             }
@@ -184,6 +209,7 @@ class CNV {
                             if(Math.abs(graph.nodeHash[key2].x -x) <= graph.nodeHash[key2].radius &&
                                 Math.abs(graph.nodeHash[key2].y -y) <= graph.nodeHash[key2].radius){
                                 graph.deletePath(key,key2);
+                                menuProperty.update("deletePath");
                                 graph.nodeHash[key].isSelected = false;
                                 menu.blocked = false;
                             }
@@ -204,9 +230,9 @@ class CNV {
                         return;
                     }
                 }
-
                 //добавление новой вершины
                 graph.add(x,y);
+                menuProperty.update("add");
             }
             //вызов меню
             if(e.which == 3){
@@ -260,9 +286,7 @@ class CNV {
             }
 
         });
-        this.cnv.addEventListener("dblclick", (e) => {
 
-        });
 
     }
 }
@@ -271,10 +295,97 @@ class Graph{
     constructor(){
         this.nodeHash = {};
         this.cnt = 0;
-
+        this.isCycled = false;
     }
     add(x,y,name =""){
         this.nodeHash[this.cnt++] = new Node(name, x, y);
+    }
+    getCountPath(){
+        let path = [];
+        let checkedNode = [];
+        for(let key in this.nodeHash){
+            for(let i =0;i<this.nodeHash[key].roads.length;i++){
+                if(!checkedNode.includes(this.nodeHash[key].roads[i].to))
+                    path.push(this.nodeHash[key].roads[i].to);
+            }
+            checkedNode.push(key);
+        }
+        return path.length;
+    }
+    isCycle(){
+        let checkedNode = [];
+        this.isCycled = false;
+        for(let key in this.nodeHash){
+            if(!checkedNode.includes(this.nodeHash[key])){
+              this.dfs2(this.nodeHash[key], checkedNode, null)
+            }
+        }
+        return this.isCycled;
+
+
+    }
+    isTree(){
+        return !this.isCycle() && ((this.getCountNodes() - this.getCountPath()) == 1);
+    }
+    dfs2(node, arrChecked, p){
+        arrChecked.push(node);
+        for(let i = 0;i<node.roads.length;i++){
+            let key = node.roads[i].to;
+            if(!arrChecked.includes(this.nodeHash[key])){
+                this.dfs2(this.nodeHash[key], arrChecked, node);
+            }
+            else if(this.nodeHash[key] != p){
+                this.isCycled = true;
+            }
+        }
+    }
+    getCyclomaticNumber(){
+        return this.getCountPath() -this.getCountNodes() + this.getConnectComponentCount();
+    }
+    getCountNodes(){
+        let count = 0;
+        for(let key in this.nodeHash){
+            count++;
+        }
+        return count;
+    }
+    getConnectComponentCount(){
+        let checkedNode = [];
+        let count = 0;
+        for(let key in this.nodeHash){
+            if(!checkedNode.includes(this.nodeHash[key])) {
+                this.dfs(this.nodeHash[key], checkedNode);
+                count++;
+            }
+        }
+        return count;
+    }
+    dfs(node, arrChecked){
+        arrChecked.push(node);
+        for(let i = 0;i<node.roads.length;i++){
+            let key = node.roads[i].to;
+            if(!arrChecked.includes(this.nodeHash[key])){
+                this.dfs(this.nodeHash[key], arrChecked);
+            }
+        }
+    }
+
+    deleteNode(node){
+        let keyDelete = null;
+        for(let key in this.nodeHash){
+            if(node == this.nodeHash[key]){
+                keyDelete = key;
+                delete this.nodeHash[key];
+            }
+        }
+        //удаление путей
+        for(let key in this.nodeHash){
+            for(let i = 0;i<this.nodeHash[key].roads.length;i++){
+                if(this.nodeHash[key].roads[i].to == keyDelete){
+                    this.nodeHash[key].roads.splice(i, 1);
+                }
+            }
+        }
     }
     addPath(key, key2){
         graph.nodeHash[key].roads.push({to:key2});
@@ -336,17 +447,21 @@ class Node{
         this.y = y;
         this.roads = [];
     }
-
-
+    setColor(color){
+        this.color = color;
+    }
+    setName(name){
+        this.name = name;
+    }
 }
 window.addEventListener("load",()=>{
     let props = {
 
     };
-
+    menuProperty = new MenuPropertyGraph();
     cnv = new CNV();
     graph = new Graph();
-    menu = new DataInput();
+    menu = new ContextMenu();
     cnv.clear();
     cnv.register();
 
@@ -358,11 +473,9 @@ window.addEventListener("scroll", ()=>{
         cnv.init();
 });
 function initElems(){
-    console.log("INT");
     let task_elem = document.querySelector("#tsk");
     let info_elem = document.querySelector("#act");
     let programm_elem = document.querySelector("#prg");
-
     let taskShow = document.querySelector(".tasks");
     let infoShow = document.querySelector(".actions");
     let programmShow = document.querySelector(".programms");
@@ -385,7 +498,6 @@ function initElems(){
 }
 function loop(){
     graph.showGraph();
-
     requestAnimationFrame(loop);
 }
 

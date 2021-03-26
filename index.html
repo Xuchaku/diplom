@@ -33,6 +33,10 @@
                     <input id="radio-3" type="radio" name="radio" value="3">
                     <label for="radio-3"></label>
                 </div>
+                <div class="form_radio_group-item">
+                    <input id="radio-4" type="radio" name="radio" value="4">
+                    <label for="radio-4"></label>
+                </div>
             </div>
             <select id="data" size="1">
                 <option value="0">Действия</option>
@@ -59,20 +63,23 @@
                 <div class="task-lst">
                     <div class="val">
                         <label data-title="Числовой параметр" for="">Вершины (<i>число</i>)</label>
-                        <input type="text" class="value-for-task">
-
+                        <input type="text" id="nodes" class="value-for-task">
                     </div>
                     <div class="val">
                         <label data-title="Числовой параметр" for="">Ребра (<i>число</i>)</label>
-                        <input type="text" class="value-for-task">
+                        <input type="text" id="paths" class="value-for-task">
                     </div>
                     <div class="val">
                         <label data-title="Числовой параметр" for="">Компоненты связности (<i>число</i>)</label>
-                        <input type="text" class="value-for-task">
+                        <input type="text" id="connect-component" class="value-for-task">
+                    </div>
+                    <div class="val">
+                        <label data-title="Числовой параметр" for="">Цикломатическое число (<i>число</i>)</label>
+                        <input type="text" id="cyclomatic-number" class="value-for-task">
                     </div>
                     <div class="val">
                         <label data-title="Числовой параметр" for="">Хроматическое число (<i>число</i>)</label>
-                        <input type="text" class="value-for-task">
+                        <input type="text" id="hromatic-number" class="value-for-task">
                     </div>
                     <div class="val">
                         <label data-title="Числовой параметр" for="">Плоский</label>
@@ -85,6 +92,14 @@
                     <div class="val">
                         <label data-title="Числовой параметр" for="">Регулярный</label>
                         <input type="checkbox">
+                    </div>
+                    <div class="val">
+                        <label data-title="Числовой параметр" for="">Дерево</label>
+                        <input id="checkTree" type="checkbox">
+                    </div>
+                    <div class="val">
+                        <label data-title="Числовой параметр" for="">Наличие циклов</label>
+                        <input id="checkCycle" type="checkbox">
                     </div>
                 </div>
                 <div class="newtask">
