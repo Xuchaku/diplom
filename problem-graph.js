@@ -2,13 +2,77 @@ const WIDTH_CNV = 640;
 const HEIGHT_CNV = 480;
 const DEFAULT_COLOR_CNV = "rgb(36,37,43)";
 
+let firstState;
 let graph;
 let cnv;
 let menu;
 let menuProperty;
-let GLOBAL_STATE = [];
+let history;
+
 
 let colors = ["black", "blue", "red", "yellow", "purple"];
+class History{
+    constructor() {
+        this.backElem = document.querySelector(".back");
+        this.nextElem = document.querySelector(".next");
+        this.state = [];
+        this.index = 1;
+        this.init();
+    }
+    init(){
+        this.backElem.addEventListener("click", ()=>{
+            this.nextElem.disabled = false;
+            graph.nodeHash = JSON.parse(this.state[--this.index]);
+            for(let key in graph.nodeHash){
+                let roads = [];
+                for(let i =0;i< graph.nodeHash[key].roads.length;i++){
+                    roads.push(graph.nodeHash[key].roads[i]);
+                }
+                roads = JSON.stringify(roads);
+                graph.nodeHash[key] = new Node(graph.nodeHash[key].name,graph.nodeHash[key].x,graph.nodeHash[key].y, graph.nodeHash[key].color);
+                graph.nodeHash[key].roads = JSON.parse(roads);
+                roads = [];
+            }
+            menuProperty.update("ALL");
+            if(this.index == 0){
+                this.state = [];
+                this.state.push({});
+                this.backElem.disabled = true;
+                this.nextElem.disabled = true;
+            }
+
+        });
+        this.nextElem.addEventListener("click", ()=>{
+            if(!(this.index + 1 > this.state.length  - 1)){
+                graph.nodeHash = JSON.parse(this.state[++this.index]);
+                for(let key in graph.nodeHash){
+                    let roads = [];
+                    for(let i =0;i< graph.nodeHash[key].roads.length;i++){
+                        roads.push(graph.nodeHash[key].roads[i]);
+                    }
+                    roads = JSON.stringify(roads);
+                    graph.nodeHash[key] = new Node(graph.nodeHash[key].name,graph.nodeHash[key].x,graph.nodeHash[key].y, graph.nodeHash[key].color);
+                    graph.nodeHash[key].roads = JSON.parse(roads);
+                    roads = [];
+                }
+                menuProperty.update("ALL");
+                if(this.index == this.state.length - 1){
+                    this.nextElem.disabled = true;
+                }
+            }
+
+
+        });
+    }
+    update(nodeHash){
+        this.state.push(JSON.stringify(nodeHash));
+        this.index = this.state.length - 1;
+        if(this.state.length > 1)
+            this.backElem.disabled = false;
+
+    }
+}
+
 
 class MenuPropertyGraph{
     constructor() {
@@ -33,19 +97,15 @@ class MenuPropertyGraph{
            case "delete":this.nodesElemCount.value = graph.getCountNodes();break;
            case "addPath":this.pathElemCount.value = graph.getCountPath();break;
            case "deletePath":this.pathElemCount.value = graph.getCountPath();break;
+           case "ALL":{
+               this.nodesElemCount.value = graph.getCountNodes();
+               this.pathElemCount.value = graph.getCountPath();
+           };break;
        }
         this.connectElemCount.value = graph.getConnectComponentCount();
         this.cyclomaticElemCount.value = graph.getCyclomaticNumber();
         this.checkedElemCycle.checked = graph.isCycle();
         this.checkedElemTree.checked = graph.isTree();
-
-
-
-
-
-
-
-
     }
 }
 
@@ -168,6 +228,7 @@ class CNV {
     changeCursor(name){
         this.cnv.style.cursor = name;
     }
+
     init() {
         this.otn = this.cnv.getBoundingClientRect();
         this.ctx.font = "16px serif"
@@ -299,6 +360,7 @@ class Graph{
     }
     add(x,y,name =""){
         this.nodeHash[this.cnt++] = new Node(name, x, y);
+        history.update(this.nodeHash);
     }
     getCountPath(){
         let path = [];
@@ -386,10 +448,12 @@ class Graph{
                 }
             }
         }
+        history.update(this.nodeHash);
     }
     addPath(key, key2){
         graph.nodeHash[key].roads.push({to:key2});
         graph.nodeHash[key2].roads.push({to:key});
+        history.update(this.nodeHash);
     }
     deletePath(key, key2){
         for(let i = 0;i<graph.nodeHash[key].roads.length;i++){
@@ -402,6 +466,7 @@ class Graph{
                 graph.nodeHash[key2].roads.splice(i, 1);
             }
         }
+        history.update(this.nodeHash);
     }
     showGraph(){
         cnv.clear();
@@ -437,9 +502,9 @@ class Graph{
     }
 }
 class Node{
-    constructor(name,x,y){
+    constructor(name,x,y, color = "#ccc"){
         this.name = name;
-        this.color = "red";
+        this.color = color;
         this.radius = 15;
         this.isConfig = false;
         this.isSelected = false;
@@ -449,9 +514,11 @@ class Node{
     }
     setColor(color){
         this.color = color;
+        history.update(graph.nodeHash);
     }
     setName(name){
         this.name = name;
+        history.update(graph.nodeHash);
     }
 }
 window.addEventListener("load",()=>{
@@ -462,8 +529,10 @@ window.addEventListener("load",()=>{
     cnv = new CNV();
     graph = new Graph();
     menu = new ContextMenu();
+    history = new History();
     cnv.clear();
     cnv.register();
+    history.update(graph.nodeHash);
 
     requestAnimationFrame(loop);
     initElems();

@@ -19,6 +19,11 @@
     </div>
     <div class="main">
         <div class="cnv-blck">
+            <div class="arrow-wrapper">
+                <input type="button" class="nextstep back" value="Back" disabled>
+                <div class="block"><span>История</span></div>
+                <input type="button" class="nextstep next" value="Next" disabled>
+            </div>
             <canvas id="cnv"></canvas>
             <div class="form_radio_group">
                 <div class="form_radio_group-item">
@@ -52,7 +57,16 @@
                 <p class="points">Количество вершин: <span></span></p>
                 <p class="path">Количество ребер: <span></span></p>
             </div>
+            <div class="history">
+                <div class="history-elem">
+                    <p>Текст текст</p>
+                </div>
+                <div class="history-elem">
+                    <p>Текст текст</p>
+                </div>
+            </div>
         </div>
+
         <div class="menu-info">
             <div class="task-text">
                 <span>Задача</span>
@@ -101,6 +115,7 @@
                         <label data-title="Числовой параметр" for="">Наличие циклов</label>
                         <input id="checkCycle" type="checkbox">
                     </div>
+
                 </div>
                 <div class="newtask">
                     <p>Текст новой задачи</p>

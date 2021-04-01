@@ -10,6 +10,65 @@
 
 
 }
+.arrow-wrapper{
+
+    display: flex;
+    padding: 10px 15px;
+    justify-content: space-between;
+    align-items: center;
+}
+.arrow-wrapper .block{
+    display: flex;
+
+    padding: 10px;
+    justify-content: center;
+}
+.arrow-wrapper .block span{
+    color: white;
+    font-size: 18px;
+}
+.nextstep{
+    padding: 10px;
+    background: rgb(137,183,26);
+    border: none;
+    color: white;
+    cursor: pointer;
+    border-radius: 7px;
+
+}
+.nextstep:disabled{
+    background: rgb(36,37,43);
+    color: rgb(69,72,82);
+}
+.back {
+
+}
+.next{
+
+}
+.history{
+    background: rgb(36,37,43);
+    border-radius: 7px;
+    margin-left: 15px;
+    margin-top: 15px;
+    padding: 5px;
+    max-width: 640px;
+    display: flex;
+    overflow: hidden;
+}
+.history-elem{
+    min-width: 200px;
+    padding: 5px 10px;
+    background: rgb(69,72,82);
+    border-radius: 7px;
+    margin-right: 7px;
+}
+.history-elem p{
+    margin:0;
+    color: white;
+    font-size: 14px;
+
+}
 .menu{
     display: flex;
     padding: 0px 10px;
@@ -41,7 +100,7 @@
     flex-direction: row;
 }
 .cnv-blck{
-    padding: 60px 40px;
+    padding: 20px 40px;
     background: rgb(69,72,82);
     margin-top: 15px;
     display: flex;
@@ -306,5 +365,52 @@
 /* Hover */
 .form_radio_group label:hover {
     color: #666;
+}
+input[type="checkbox"]{
+    appearance:none;
+    width:40px;
+    height:18px;
+    border-bottom: none;
+    border-radius:30px;
+    background:rgb(36,37,43);
+    position:relative;
+    display:inline-block;
+    overflow:hidden;
+    vertical-align:middle;
+    transition: background 0.3s;
+    box-sizing:border-box;
+}
+input[type="checkbox"]:after{
+    content:'';
+    position:absolute;
+    top:2px;
+    border-radius:30px;
+    left:2px;
+    width:14px;
+    height:14px;
+    background:rgb(69,72,82);
+    transition: left 0.1s cubic-bezier(0.785, 0.135, 0.15, 0.86);
+}
+input[type="checkbox"]:checked{
+    background:rgb(137,183,26);
+
+}
+input[type="checkbox"]:checked:after{
+    left:24px;
+
+}
+
+input[type="checkbox"]:hover:not(:checked):not(:disabled):after,
+input[type="checkbox"]:focus:not(:checked):not(:disabled):after{
+
+}
+
+input[type="checkbox"]:hover:checked:not(:disabled):after,
+input[type="checkbox"]:focus:checked:not(:disabled):after{
+    left:24px;
+}
+
+input[type="checkbox"]:disabled{
+    opacity:0.5;
 }
 
