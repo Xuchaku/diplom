@@ -8,7 +8,7 @@ let cnv;
 let menu;
 let menuProperty;
 let history;
-
+//alsdfjlasd
 
 let colors = ["black", "blue", "red", "yellow", "purple"];
 class History{
