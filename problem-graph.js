@@ -274,6 +274,8 @@ class CNV {
         let cursorIsHover = false;
         let isMove = false;
         let targetMove = null;
+        let elemHovered = null;
+        let pathHovered = [];
         let arrToAdd = [];
         let arrToPath = [];
         function clearData(){
@@ -288,14 +290,46 @@ class CNV {
                 if(Math.abs(graph.nodeHash[key].x -x) <= graph.nodeHash[key].radius &&
                     Math.abs(graph.nodeHash[key].y -y) <= graph.nodeHash[key].radius){
                     cursorIsHover = true;
+                    elemHovered = graph.nodeHash[key];
                 }
             }
             if(cursorIsHover){
                 this.changeCursor(cursorInp);
+                elemHovered.isSelected = true;
                 cursorIsHover = false;
             }
             else{
                 this.changeCursor("default");
+                if(elemHovered) {
+                    elemHovered.isSelected = false;
+                    elemHovered = null;
+                }
+            }
+            if(menuLeft.mode == 5 && !elemHovered){
+                for (let key in graph.nodeHash) {
+                    for(let i = 0;i<graph.nodeHash[key].roads.length;i++){
+                        if (Math.abs((x-graph.nodeHash[key].roads[i].xStart)/(graph.nodeHash[key].roads[i].xEnd - graph.nodeHash[key].roads[i].xStart) -
+                            (y-graph.nodeHash[key].roads[i].yStart)/(graph.nodeHash[key].roads[i].yEnd - graph.nodeHash[key].roads[i].yStart)) < 0.15
+                        ) {
+                            cursorIsHover = true;
+                            pathHovered.push(graph.nodeHash[key].roads[i]);
+                        }
+                    }
+                }
+                if(cursorIsHover){
+                    this.changeCursor(cursorInp);
+                    for(let i =0;i<pathHovered.length;i++)
+                        pathHovered[i].isSelected = true;
+                    cursorIsHover = false;
+                }
+                else{
+                    this.changeCursor("default");
+                    for(let i =0;i<pathHovered.length;i++) {
+                        pathHovered[i].isSelected = false;
+                    }
+                    pathHovered = [];
+                }
+
             }
         }
         document.addEventListener("keydown", (e)=>{
@@ -385,6 +419,17 @@ class CNV {
                                 Math.abs(graph.nodeHash[key].y - y) <= graph.nodeHash[key].radius) {
                                 graph.deleteNode(graph.nodeHash[key]);
                                 menuProperty.update("delete");
+                                return;
+                            }
+                        }
+                        for (let key in graph.nodeHash) {
+                            for(let i = 0;i<graph.nodeHash[key].roads.length;i++){
+                                if (Math.abs((x-graph.nodeHash[key].roads[i].xStart)/(graph.nodeHash[key].roads[i].xEnd - graph.nodeHash[key].roads[i].xStart) -
+                                    (y-graph.nodeHash[key].roads[i].yStart)/(graph.nodeHash[key].roads[i].yEnd - graph.nodeHash[key].roads[i].yStart)) < 0.15
+                                ) {
+                                    graph.deletePath(graph.nodeHash[key].roads[i].in, graph.nodeHash[key].roads[i].to);
+                                    menuProperty.update("deletePath");
+                                }
                             }
                         }
                     }
@@ -617,8 +662,8 @@ class Graph{
         history.update(this.nodeHash);
     }
     addPath(key, key2){
-        graph.nodeHash[key].roads.push({to:key2});
-        graph.nodeHash[key2].roads.push({to:key});
+        graph.nodeHash[key].roads.push(new Path(key, key2,  graph.nodeHash[key].x,  graph.nodeHash[key].y, graph.nodeHash[key2].x,  graph.nodeHash[key2].y));
+        graph.nodeHash[key2].roads.push(new Path(key2, key, graph.nodeHash[key2].x,  graph.nodeHash[key2].y, graph.nodeHash[key].x,  graph.nodeHash[key].y));
         history.update(this.nodeHash);
     }
     deletePath(key, key2){
@@ -653,6 +698,7 @@ class Graph{
             for(let i =0;i<this.nodeHash[key].roads.length;i++){
                 let toKey = this.nodeHash[key].roads[i].to;
                 cnv.ctx.beginPath();
+                cnv.ctx.shadowBlur= this.nodeHash[key].roads[i].isSelected ? 10 : 0;
                 cnv.ctx.moveTo(this.nodeHash[key].x, this.nodeHash[key].y);
                 cnv.ctx.lineTo(this.nodeHash[toKey].x, this.nodeHash[toKey].y);
                 cnv.ctx.stroke();
@@ -698,6 +744,17 @@ class Node{
     setName(name){
         this.name = name;
         history.update(graph.nodeHash);
+    }
+}
+class Path{
+    constructor(namein,nameto,x1,y1,x2,y2,select = false) {
+        this.to = nameto;
+        this.in = namein;
+        this.xStart = x1;
+        this.yStart = y1;
+        this.xEnd = x2;
+        this.yEnd = y2;
+        this.isSelected = select;
     }
 }
 window.addEventListener("load",()=>{
