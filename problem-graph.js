@@ -23,6 +23,7 @@ class History{
     init(){
         this.backElem.addEventListener("click", ()=>{
             this.nextElem.disabled = false;
+
             graph.nodeHash = JSON.parse(this.state[--this.index]);
             for(let key in graph.nodeHash){
                 let roads = [];
@@ -37,7 +38,7 @@ class History{
             menuProperty.update("ALL");
             if(this.index == 0){
                 this.state = [];
-                this.state.push({});
+                this.state.push(JSON.stringify({}));
                 this.backElem.disabled = true;
                 this.nextElem.disabled = true;
             }
@@ -222,6 +223,7 @@ class Menu{
         this.elemSelect = document.querySelector(".select");
         this.elemAdds = document.querySelector(".adds");
         this.elemPath = document.querySelector(".path");
+        this.elemRemove = document.querySelector(".remove");
         this.mode = 0;
         this.init();
     }
@@ -238,6 +240,9 @@ class Menu{
         });
         this.elemPath.addEventListener("click", ()=>{
             this.mode = 4;
+        });
+        this.elemRemove.addEventListener("click", ()=>{
+            this.mode = 5;
         })
     }
 
@@ -277,6 +282,21 @@ class CNV {
                 graph.nodeHash[arrToAdd[i].key].phantomY = null;
             }
             arrToAdd = [];
+        }
+        function hovered(cursorInp,x,y){
+            for(let key in graph.nodeHash){
+                if(Math.abs(graph.nodeHash[key].x -x) <= graph.nodeHash[key].radius &&
+                    Math.abs(graph.nodeHash[key].y -y) <= graph.nodeHash[key].radius){
+                    cursorIsHover = true;
+                }
+            }
+            if(cursorIsHover){
+                this.changeCursor(cursorInp);
+                cursorIsHover = false;
+            }
+            else{
+                this.changeCursor("default");
+            }
         }
         document.addEventListener("keydown", (e)=>{
             if(e.code == "Enter"){
@@ -337,6 +357,7 @@ class CNV {
                             menuProperty.update("add");
                         }
                     }
+                    //построение ребра
                     if(menuLeft.mode == 4){
                         for (let key in graph.nodeHash) {
                             if (Math.abs(graph.nodeHash[key].x - x) <= graph.nodeHash[key].radius &&
@@ -355,6 +376,16 @@ class CNV {
                             graph.nodeHash[arrToPath[0]].phantomY = null;
                             menuProperty.update("addPath");
                             arrToPath = [];
+                        }
+                    }
+                    //удаление элемента
+                    if (menuLeft.mode == 5) {
+                        for (let key in graph.nodeHash) {
+                            if (Math.abs(graph.nodeHash[key].x - x) <= graph.nodeHash[key].radius &&
+                                Math.abs(graph.nodeHash[key].y - y) <= graph.nodeHash[key].radius) {
+                                graph.deleteNode(graph.nodeHash[key]);
+                                menuProperty.update("delete");
+                            }
                         }
                     }
 
@@ -446,19 +477,7 @@ class CNV {
             if(isConstruct){
                 if (menuLeft.mode == 2){
                     //изменение курсора
-                    for(let key in graph.nodeHash){
-                        if(Math.abs(graph.nodeHash[key].x -x) <= graph.nodeHash[key].radius &&
-                            Math.abs(graph.nodeHash[key].y -y) <= graph.nodeHash[key].radius){
-                            cursorIsHover = true;
-                        }
-                    }
-                    if(cursorIsHover){
-                        this.changeCursor("move");
-                        cursorIsHover = false;
-                    }
-                    else{
-                        this.changeCursor("default");
-                    }
+                    hovered.call(this,"move",x,y);
 
                     //движение
                     if(isMove){
@@ -473,25 +492,15 @@ class CNV {
                     }
                 }
                 if (menuLeft.mode == 4){
-                    for(let key in graph.nodeHash){
-                        if(Math.abs(graph.nodeHash[key].x -x) <= graph.nodeHash[key].radius &&
-                            Math.abs(graph.nodeHash[key].y -y) <= graph.nodeHash[key].radius){
-                            cursorIsHover = true;
-                        }
-                    }
-                    if(cursorIsHover){
-                        this.changeCursor("pointer");
-                        cursorIsHover = false;
-                    }
-                    else{
-                        this.changeCursor("default");
-                    }
 
+                    hovered.call(this,"pointer",x,y);
                     if(arrToPath.length == 1){
                         graph.nodeHash[arrToPath[0]].phantomX = x;
                         graph.nodeHash[arrToPath[0]].phantomY = y;
                     }
-
+                }
+                if(menuLeft.mode == 5){
+                    hovered.call(this,"no-drop",x,y);
                 }
             }
 
