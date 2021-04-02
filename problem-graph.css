@@ -17,6 +17,18 @@
     justify-content: space-between;
     align-items: center;
 }
+.cnv-wrap{
+    display: flex;
+
+}
+.button-menu{
+    display: flex;
+    flex-direction: column;
+}
+.btn-menu{
+    width: 30px;
+    height: 30px;
+}
 .arrow-wrapper .block{
     display: flex;
 

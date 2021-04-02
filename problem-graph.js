@@ -2,13 +2,14 @@ const WIDTH_CNV = 640;
 const HEIGHT_CNV = 480;
 const DEFAULT_COLOR_CNV = "rgb(36,37,43)";
 
-let firstState;
+let isConstruct = true;
+let menuLeft;
 let graph;
 let cnv;
 let menu;
 let menuProperty;
 let history;
-//alsdfjlasd
+
 
 let colors = ["black", "blue", "red", "yellow", "purple"];
 class History{
@@ -72,8 +73,6 @@ class History{
 
     }
 }
-
-
 class MenuPropertyGraph{
     constructor() {
       this.nodesElemCount = document.querySelector("#nodes");
@@ -108,7 +107,6 @@ class MenuPropertyGraph{
         this.checkedElemTree.checked = graph.isTree();
     }
 }
-
 class ContextMenu{
     constructor() {
         this.x = 0;
@@ -133,6 +131,7 @@ class ContextMenu{
         }
     }
     init(){
+
         for(let i =0;i<this.elemsColor.length;i++){
             this.elemsColor[i].addEventListener("change", ()=>{
                 this.blocked = false;
@@ -161,7 +160,6 @@ class ContextMenu{
         });
         this.elem.addEventListener("change", ()=>{
             let select = this.elem.value;
-
             if(select == "1"){
                 this.setname.value = "";
                 this.targetPoint.isSelected = true;
@@ -217,6 +215,34 @@ class ContextMenu{
     }
 
 }
+class Menu{
+    constructor(props) {
+        this.mainElem = document.querySelector(".button-menu");
+        this.elemAdd = document.querySelector(".add");
+        this.elemSelect = document.querySelector(".select");
+        this.elemAdds = document.querySelector(".adds");
+        this.elemPath = document.querySelector(".path");
+        this.mode = 0;
+        this.init();
+    }
+    init(){
+        this.elemAdd.addEventListener("click", ()=>{
+            //мод добавления одной вершины
+            this.mode = 1;
+        });
+        this.elemSelect.addEventListener("click", ()=>{
+            this.mode = 2;
+        });
+        this.elemAdds.addEventListener("click", ()=>{
+            this.mode = 3;
+        });
+        this.elemPath.addEventListener("click", ()=>{
+            this.mode = 4;
+        })
+    }
+
+
+}
 class CNV {
     constructor() {
         this.cnv = document.querySelector("#cnv");
@@ -243,12 +269,101 @@ class CNV {
         let cursorIsHover = false;
         let isMove = false;
         let targetMove = null;
+        let arrToAdd = [];
+        let arrToPath = [];
+        function clearData(){
+            for(let i = 0;i<arrToAdd.length;i++){
+                graph.nodeHash[arrToAdd[i].key].phantomX = null;
+                graph.nodeHash[arrToAdd[i].key].phantomY = null;
+            }
+            arrToAdd = [];
+        }
+        document.addEventListener("keydown", (e)=>{
+            if(e.code == "Enter"){
+                console.log("ENTER");
+                clearData();
+            }
+        });
         this.cnv.addEventListener("contextmenu", (e)=>{
             e.preventDefault();
         });
+
         this.cnv.addEventListener("mousedown", (e) => {
             let x = e.clientX - this.otn.x;
             let y = e.clientY - this.otn.y;
+            if(isConstruct){
+                if(e.which == 1) {
+                    //режим создания задачи
+                    if (menuLeft.mode == 1) {
+                        for (let key in graph.nodeHash) {
+                            if (Math.abs(graph.nodeHash[key].x - x) <= graph.nodeHash[key].radius + 15 &&
+                                Math.abs(graph.nodeHash[key].y - y) <= graph.nodeHash[key].radius + 15) {
+                                return;
+                            }
+                        }
+                        graph.add(x, y);
+                        menuProperty.update("add");
+                    }
+                    //выделение вершины
+                    if (menuLeft.mode == 2) {
+                        for (let key in graph.nodeHash) {
+                            if (Math.abs(graph.nodeHash[key].x - x) <= graph.nodeHash[key].radius &&
+                                Math.abs(graph.nodeHash[key].y - y) <= graph.nodeHash[key].radius) {
+                                isMove = true;
+                                targetMove = graph.nodeHash[key];
+                                targetMove.isSelected = true;
+                            }
+                        }
+                    }
+                    //множественное создание вершин с ребрами
+                    if (menuLeft.mode == 3) {
+                        for (let key in graph.nodeHash) {
+                            if (Math.abs(graph.nodeHash[key].x - x) <= graph.nodeHash[key].radius + 15 &&
+                                Math.abs(graph.nodeHash[key].y - y) <= graph.nodeHash[key].radius + 15) {
+                                return;
+                            }
+                        }
+                        if(arrToAdd.length < 1) {
+                            graph.add(x, y);
+                            arrToAdd.push({x,y, key: graph.getKey(x,y)});
+                            menuProperty.update("add");
+                        }
+                        else{
+                            let key1 = arrToAdd[arrToAdd.length - 1].key;
+                            graph.add(x, y);
+                            arrToAdd.push({x,y, key: graph.getKey(x,y)});
+                            graph.addPath(key1, graph.getKey(x,y));
+                            menuProperty.update("addPath");
+                            menuProperty.update("add");
+                        }
+                    }
+                    if(menuLeft.mode == 4){
+                        for (let key in graph.nodeHash) {
+                            if (Math.abs(graph.nodeHash[key].x - x) <= graph.nodeHash[key].radius &&
+                                Math.abs(graph.nodeHash[key].y - y) <= graph.nodeHash[key].radius) {
+                                if(arrToPath.length < 2 && !arrToPath.includes(key)){
+                                    graph.nodeHash[key].isSelected = true;
+                                    arrToPath.push(key);
+                                }
+                            }
+                        }
+                        if(arrToPath.length == 2){
+                            graph.addPath(arrToPath[0], arrToPath[1]);
+                            graph.nodeHash[arrToPath[0]].isSelected = false;
+                            graph.nodeHash[arrToPath[1]].isSelected = false;
+                            graph.nodeHash[arrToPath[0]].phantomX = null;
+                            graph.nodeHash[arrToPath[0]].phantomY = null;
+                            menuProperty.update("addPath");
+                            arrToPath = [];
+                        }
+                    }
+
+                }
+            }
+            else{
+
+            }
+            /*
             //добавление вершины
             if(e.which == 1){
                 //построение ребра, пока без класса для ребра
@@ -316,34 +431,68 @@ class CNV {
                     }
                 }
 
-            }
+            }*/
         });
         this.cnv.addEventListener("mouseup", () => {
             isMove = false;
+            if(targetMove) {
+                targetMove.isSelected = false;
+            }
         });
         this.cnv.addEventListener("mousemove", (e) => {
 
             let x = e.clientX - this.otn.x;
             let y = e.clientY - this.otn.y;
-            //изменение курсора
-            for(let key in graph.nodeHash){
-                if(Math.abs(graph.nodeHash[key].x -x) <= graph.nodeHash[key].radius &&
-                    Math.abs(graph.nodeHash[key].y -y) <= graph.nodeHash[key].radius){
-                    cursorIsHover = true;
-                }
-            }
-            if(cursorIsHover){
-                this.changeCursor("pointer");
-                cursorIsHover = false;
-            }
-            else{
-                this.changeCursor("default");
-            }
+            if(isConstruct){
+                if (menuLeft.mode == 2){
+                    //изменение курсора
+                    for(let key in graph.nodeHash){
+                        if(Math.abs(graph.nodeHash[key].x -x) <= graph.nodeHash[key].radius &&
+                            Math.abs(graph.nodeHash[key].y -y) <= graph.nodeHash[key].radius){
+                            cursorIsHover = true;
+                        }
+                    }
+                    if(cursorIsHover){
+                        this.changeCursor("move");
+                        cursorIsHover = false;
+                    }
+                    else{
+                        this.changeCursor("default");
+                    }
 
-            //движение
-            if(isMove){
-                targetMove.x = x;
-                targetMove.y = y;
+                    //движение
+                    if(isMove){
+                        targetMove.x = x;
+                        targetMove.y = y;
+                    }
+                }
+                if (menuLeft.mode == 3){
+                    if(arrToAdd.length > 0){
+                        graph.nodeHash[arrToAdd[arrToAdd.length - 1].key].phantomX = x;
+                        graph.nodeHash[arrToAdd[arrToAdd.length - 1].key].phantomY = y;
+                    }
+                }
+                if (menuLeft.mode == 4){
+                    for(let key in graph.nodeHash){
+                        if(Math.abs(graph.nodeHash[key].x -x) <= graph.nodeHash[key].radius &&
+                            Math.abs(graph.nodeHash[key].y -y) <= graph.nodeHash[key].radius){
+                            cursorIsHover = true;
+                        }
+                    }
+                    if(cursorIsHover){
+                        this.changeCursor("pointer");
+                        cursorIsHover = false;
+                    }
+                    else{
+                        this.changeCursor("default");
+                    }
+
+                    if(arrToPath.length == 1){
+                        graph.nodeHash[arrToPath[0]].phantomX = x;
+                        graph.nodeHash[arrToPath[0]].phantomY = y;
+                    }
+
+                }
             }
 
         });
@@ -388,6 +537,14 @@ class Graph{
     }
     isTree(){
         return !this.isCycle() && ((this.getCountNodes() - this.getCountPath()) == 1);
+    }
+    getKey(x,y){
+        for(let key in this.nodeHash){
+            if(this.nodeHash[key].x == x && this.nodeHash[key].y == y){
+                return key;
+            }
+        }
+        return null;
     }
     dfs2(node, arrChecked, p){
         arrChecked.push(node);
@@ -473,6 +630,17 @@ class Graph{
         cnv.ctx.shadowColor="rgba(137, 183, 26, 1)";
         cnv.ctx.shadowBlur = 0;
         for(let key in this.nodeHash){
+            let point = this.nodeHash[key];
+            if(point.phantomX != null && point.phantomY != null){
+                console.log("PHANTOM");
+                cnv.ctx.beginPath();
+                cnv.ctx.moveTo(point.x, point.y);
+                cnv.ctx.lineTo(point.phantomX, point.phantomY);
+                cnv.ctx.stroke();
+                cnv.ctx.closePath();
+            }
+        }
+        for(let key in this.nodeHash){
             for(let i =0;i<this.nodeHash[key].roads.length;i++){
                 let toKey = this.nodeHash[key].roads[i].to;
                 cnv.ctx.beginPath();
@@ -510,6 +678,8 @@ class Node{
         this.isSelected = false;
         this.x = x;
         this.y = y;
+        this.phantomX = null;
+        this.phantomY = null;
         this.roads = [];
     }
     setColor(color){
@@ -530,6 +700,7 @@ window.addEventListener("load",()=>{
     graph = new Graph();
     menu = new ContextMenu();
     history = new History();
+    menuLeft = new Menu();
     cnv.clear();
     cnv.register();
     history.update(graph.nodeHash);

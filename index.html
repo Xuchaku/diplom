@@ -19,12 +19,17 @@
     </div>
     <div class="main">
         <div class="cnv-blck">
-            <div class="arrow-wrapper">
-                <input type="button" class="nextstep back" value="Back" disabled>
-                <div class="block"><span>История</span></div>
-                <input type="button" class="nextstep next" value="Next" disabled>
+            <div class="cnv-wrap">
+                <div class="button-menu">
+                    <input type="button" class="btn-menu add" value="T">
+                    <input type="button" class="btn-menu select" value="S">
+                    <input type="button" class="btn-menu adds" value="MNT">
+                    <input type="button" class="btn-menu path" value="P">
+                    <input type="button" class="btn-menu back" disabled>
+                    <input type="button" class="btn-menu next" disabled>
+                </div>
+                <canvas id="cnv"></canvas>
             </div>
-            <canvas id="cnv"></canvas>
             <div class="form_radio_group">
                 <div class="form_radio_group-item">
                     <input id="radio-1" type="radio" name="radio" value="1" checked>
