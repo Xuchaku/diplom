@@ -24,10 +24,25 @@
 .button-menu{
     display: flex;
     flex-direction: column;
+    border-left: 2px solid #242424;
+    border-bottom: 2px solid #242424;
+    border-bottom-left-radius: 5px;
+
 }
 .btn-menu{
     width: 30px;
+    border-radius: 4px;
+    background-image: linear-gradient(to top, #242424 0%, #303030 100%);
+    color: #ccc;
     height: 30px;
+}
+.btn-menu:disabled{
+    opacity: 0.5;
+}
+.btn-menu-active{
+    background-image: linear-gradient(to top, #151515 0%, #1d1d1d 100%);
+    color: rgba(137, 183, 26, 1);
+    text-shadow: 0px 0px 13px rgba(137, 183, 26, 1);
 }
 .arrow-wrapper .block{
     display: flex;
@@ -38,6 +53,13 @@
 .arrow-wrapper .block span{
     color: white;
     font-size: 18px;
+}
+.point-grow{
+    left:0;
+    font-size: 10px;
+    border: 1px solid rgb(137,183,26);
+    color: rgb(137,183,26);
+    background: rgb(36,37,43);
 }
 .nextstep{
     padding: 10px;
@@ -65,15 +87,18 @@
     margin-top: 15px;
     padding: 5px;
     max-width: 640px;
+    height: 100px;
     display: flex;
-    overflow: hidden;
+    flex-wrap: wrap;
+    overflow: auto;
 }
 .history-elem{
-    min-width: 200px;
+    min-width: 150px;
     padding: 5px 10px;
     background: rgb(69,72,82);
     border-radius: 7px;
     margin-right: 7px;
+    margin-bottom: 5px;
 }
 .history-elem p{
     margin:0;
@@ -149,6 +174,7 @@
 .task-text span{
     color: rgb(17,228,213);
     font-weight: bold;
+
     background:  rgb(69,72,82);
     text-align: center;
     padding: 10px;
@@ -170,6 +196,12 @@
     padding: 5px;
     border-radius: 7px;
     margin-bottom: 15px;
+}
+.tasks p{
+    color: rgb(137,183,26);
+    text-align: center;
+    font-weight: bold;
+    margin:0;
 }
 .actions{
 
@@ -260,8 +292,16 @@
     margin-bottom: 15px;
     padding: 5px;
 }
-.newtask p {
+#text-newtask {
     color: white;
+    font-size: 16px;
+}
+.newtask p {
+    color: rgb(137,183,26);
+    padding: 0;
+    margin: 0;
+    padding-left: 5px;
+    font-size: 12px;
 }
 
 
@@ -301,9 +341,7 @@
     color: rgb(137,183,26);
     font-size: 12px;
 }
-.hiden{
-    display: none;
-}
+
 .cnv-blck .statistic{
     display: flex;
     flex-direction: row;
@@ -425,4 +463,184 @@ input[type="checkbox"]:focus:checked:not(:disabled):after{
 input[type="checkbox"]:disabled{
     opacity:0.5;
 }
+.params-graph{
+    display: flex;
+    border-top: 2px solid #242424;
+    border-left: 2px solid #242424;
+    border-right: 2px solid #242424;
+    border-top-right-radius: 5px;
+    border-top-left-radius: 5px;
+    flex-direction: row;
 
+}
+
+.selectstyle{
+    height: 30px;
+    font-size: 10px;
+    border: none;
+    border-bottom: 1px solid rgb(137,183,26);
+    color: #ccc;
+    background-image: linear-gradient(to top, #242424 0%, #303030 100%);
+
+}
+.selectstyle option{
+    background:rgb(36,37,43);
+}
+.actions-user{
+    background: rgb(69,72,82);
+    border-radius: 6px;
+    padding: 10px 5px;
+    margin-bottom: 15px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+.actions-user p{
+    text-align: center;
+    color: #ccc;
+    margin: 0;
+}
+.actions-wrapp{
+    display: flex;
+    width: 50%;
+    flex-direction: column;
+}
+.actions table{
+}
+th, td:first-child {
+    background: #AFCDE7;
+    color: black;
+    padding: 10px 20px;
+}
+th, td {
+    border-style: solid;
+    border-width: 0 1px 1px 0;
+    border-color: white;
+}
+td {
+    background: #D8E6F3;
+    padding-left: 10px;
+    font-size: 14px;
+}
+td span{
+    font-weight: bold;
+}
+th:first-child, td:first-child {
+    text-align: left;
+
+}
+td:first-child {
+    width: 15%;
+}
+.modules{
+    border: 2px solid rgb(69,72,82);
+    padding: 5px;
+    border-radius: 7px;
+    margin-bottom: 15px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    margin-top: 15px;
+
+}
+.modules pre{
+    padding-left: 0;
+    margin-left:0;
+    color: rgb(137,183,26);
+}
+.modules p, h3 {
+    color: #ccc;
+}
+.hiden{
+    display: none;
+}
+.tooltip
+{
+    position: relative;
+    cursor: help;
+    display: inline-block;
+}
+.tooltip span
+{
+    visibility: hidden;
+    position: absolute;
+    bottom: 30px;
+    left: 50%;
+    z-index: 999;
+    width: 230px;
+    margin-left: -127px;
+    padding: 10px;
+    border: 2px solid #ccc;
+    opacity: .9;
+    background-color: #ddd;
+    background-image: -webkit-linear-gradient(rgba(255,255,255,.5), rgba(255,255,255,0));
+    background-image: -moz-linear-gradient(rgba(255,255,255,.5), rgba(255,255,255,0));
+    background-image: -ms-linear-gradient(rgba(255,255,255,.5), rgba(255,255,255,0));
+    background-image: -o-linear-gradient(rgba(255,255,255,.5), rgba(255,255,255,0));
+    background-image: linear-gradient(rgba(255,255,255,.5), rgba(255,255,255,0));
+    -moz-border-radius: 4px;
+    border-radius: 4px;
+    -moz-box-shadow: 0 1px 2px rgba(0,0,0,.4), 0 1px 0 rgba(255,255,255,.5) inset;
+    -webkit-box-shadow: 0 1px 2px rgba(0,0,0,.4), 0 1px 0 rgba(255,255,255,.5) inset;
+    box-shadow: 0 1px 2px rgba(0,0,0,.4), 0 1px 0 rgba(255,255,255,.5) inset;
+    text-shadow: 0 1px 0 rgba(255,255,255,.4);
+}
+
+.tooltip:hover
+{
+    border: 0; /* IE6 fix */
+}
+
+.tooltip:hover span
+{
+    visibility: visible;
+}
+
+.tooltip span:before,
+.tooltip span:after
+{
+    content: "";
+    position: absolute;
+    z-index: 1000;
+    bottom: -8px;
+    left: 50%;
+    margin-left: -8px;
+    border-top: 8px solid #ddd;
+    border-left: 8px solid transparent;
+    border-right: 8px solid transparent;
+    border-bottom: 0;
+}
+
+.tooltip span:before
+{
+    border-top-color: #ccc;
+    bottom: -9px;
+}
+.api-block{
+    display: flex;
+    flex-direction: column;
+    border: 2px solid rgb(69,72,82);
+    padding: 5px;
+    border-radius: 7px;
+    margin-bottom: 15px;
+}
+.api-block h3{
+    text-align: center;
+
+}
+.api-block div p {
+    margin:0;
+}
+.api-block div{
+
+    border: 2px solid rgb(69,72,82);
+    border-radius: 7px;
+    margin-bottom: 5px;
+    padding: 5px 10px;
+
+}
+.api-block div.dev{
+    background: rgb(3,144,60);
+
+}

@@ -14,21 +14,38 @@
     <div class="menu">
         <span>GRAPH</span>
         <p id="tsk">Задачи</p>
+        <p id="lrn" >Решать задачи</p>
+        <p id="mdl" >Модули</p>
+        <p id="api" >API</p>
         <p id="act">Справка</p>
         <p id="prg" >О программе</p>
     </div>
     <div class="main">
         <div class="cnv-blck">
+            <div class="params-graph">
+                <select id="point-grow" class="selectstyle" size="1">
+                    <option value="title">Размер вершин</option>
+                    <option value="5">Малый</option>
+                    <option value="10">Средний</option>
+                    <option value="15">Большой</option>
+                </select>
+                <select id="style-path" class="selectstyle" size="1">
+                    <option value="title">Оформление ребер</option>
+                    <option value="0">Сплошная</option>
+                    <option value="5, 15">Пунткир</option>
+                    <option value="1,2">Точечная</option>
+                </select>
+            </div>
             <div class="cnv-wrap">
                 <div class="button-menu">
-                    <input type="button" class="btn-menu add" value="T">
+                    <input type="button" class="btn-menu btn-menu-active add" value="T">
                     <input type="button" class="btn-menu select" value="S">
-                    <input type="button" class="btn-menu adds" value="MNT">
+                    <input type="button" class="btn-menu adds" value="M">
                     <input type="button" class="btn-menu path" value="P">
                     <input type="button" class="btn-menu remove" value="D">
-                    <input type="button" class="btn-menu removePath" value="DP">
-                    <input type="button" class="btn-menu back" disabled>
-                    <input type="button" class="btn-menu next" disabled>
+                    <input type="button" class="btn-menu clear" value="C">
+                    <input type="button" class="btn-menu back" value="<" disabled>
+                    <input type="button" class="btn-menu next" value=">" disabled>
                 </div>
                 <canvas id="cnv"></canvas>
             </div>
@@ -49,28 +66,41 @@
                     <input id="radio-4" type="radio" name="radio" value="4">
                     <label for="radio-4"></label>
                 </div>
+                <div class="form_radio_group-item">
+                    <input id="radio-5" type="radio" name="radio" value="4">
+                    <label for="radio-5"></label>
+                </div>
+                <div class="form_radio_group-item">
+                    <input id="radio-6" type="radio" name="radio" value="4">
+                    <label for="radio-6"></label>
+                </div>
+                <div class="form_radio_group-item">
+                    <input id="radio-7" type="radio" name="radio" value="4">
+                    <label for="radio-7"></label>
+                </div>
             </div>
             <select id="data" size="1">
                 <option value="0">Действия</option>
                 <option value="1">Назначить имя</option>
                 <option value="2">Поменять цвет</option>
-                <option value="3">Удалить вершину</option>
-                <option value="4">Построить ребро</option>
-                <option value="5">Удалить ребро</option>
+                <option value="3">Размер</option>
+                <option value="4">Выделить</option>
+                <option value="5">Вес</option>
                 <option value="6">Закрыть</option>
             </select>
             <input type="text" id="setname">
             <div class="statistic">
                 <p class="points">Количество вершин: <span></span></p>
                 <p class="path">Количество ребер: <span></span></p>
+                <p class="points">Количество компонент связности: <span></span></p>
+                <p class="path">Цикломатическое число: <span></span></p>
+                <p class="points">Двудольность <span></span></p>
+                <p class="path">Дерево <span></span></p>
+                <p class="points">Лес <span></span></p>
+                <p class="path">Наличие циклов <span></span></p>
+                <p class="path">Двусвязность <span></span></p>
             </div>
             <div class="history">
-                <div class="history-elem">
-                    <p>Текст текст</p>
-                </div>
-                <div class="history-elem">
-                    <p>Текст текст</p>
-                </div>
             </div>
         </div>
 
@@ -79,8 +109,9 @@
                 <span>Задача</span>
                 <p>Постройте плоский граф с 17 рёбрами и 8 вершинами и минимальным числом компонент связности</p>
             </div>
+            <input type="button" class="btn-tsk" id="load-solution" value="Отправить на проверку">
             <div class="tasks hiden">
-                <span>Конструктор задач</span>
+                <p href="#" class="tooltip">Конструктор задач (?)<span><b>Характеристики</b><br>Характеристик заполняются при составлении графа. Можно заполнить вручную.</span></p>
                 <div class="task-lst">
                     <div class="val">
                         <label data-title="Числовой параметр" for="">Вершины (<i>число</i>)</label>
@@ -91,7 +122,7 @@
                         <input type="text" id="paths" class="value-for-task">
                     </div>
                     <div class="val">
-                        <label data-title="Числовой параметр" for="">Компоненты связности (<i>число</i>)</label>
+                        <label data-title="Числовой параметр" for="">Компоненты связности(<i>число</i>)</label>
                         <input type="text" id="connect-component" class="value-for-task">
                     </div>
                     <div class="val">
@@ -108,11 +139,11 @@
                     </div>
                     <div class="val">
                         <label data-title="Числовой параметр" for="">Двудольный</label>
-                        <input type="checkbox">
+                        <input id="dicotyledonous" type="checkbox">
                     </div>
                     <div class="val">
                         <label data-title="Числовой параметр" for="">Регулярный</label>
-                        <input type="checkbox">
+                        <input id="checkRegular" type="checkbox">
                     </div>
                     <div class="val">
                         <label data-title="Числовой параметр" for="">Дерево</label>
@@ -122,15 +153,203 @@
                         <label data-title="Числовой параметр" for="">Наличие циклов</label>
                         <input id="checkCycle" type="checkbox">
                     </div>
+                    <div class="val">
+                        <label data-title="Числовой параметр" for="">Лес</label>
+                        <input id="checkWood" type="checkbox">
+                    </div>
+                    <div class="val">
+                        <label data-title="Числовой параметр" for="">Двусвязность</label>
+                        <input id="checkConnected" type="checkbox">
+                    </div>
 
                 </div>
                 <div class="newtask">
-                    <p>Текст новой задачи</p>
+                    <p id="text-newtask">Текст новой задачи</p>
+                </div>
+                <div class="actions-user">
+                    <p href="#" class="tooltip">Назначение действий (?)<span><b>Действия</b><br>Установка действия на кнопки мыши для текущей задачи</span></p>
+                    <div class="actions-wrapp">
+                        <label data-title="Числовой параметр" for="">Левая кнопка мыши</label>
+                        <select id="lkm" class="selectstyle" size="1">
+                            <option value="title">Действие</option>
+                            <option value="construct">Построение</option>
+                            <option value="select">Выделение</option>
+                            <option value="3">Перемещение</option>
+                            <option value="delete">Удаление</option>
+                        </select>
+                    </div>
+                    <div class="actions-wrapp">
+                        <label data-title="Числовой параметр" for="">Правая кнопка мыши</label>
+                        <select id="rkm" class="selectstyle" size="1">
+                            <option value="title">Действие</option>
+                            <option value="delete">Удаление</option>
+                            <option value="changecolor">Смена цвета</option>
+                            <option value="select">Выделение</option>
+                        </select>
+                    </div>
+                    <p href="#" class="tooltip">Подсказки (?)<span><b>Подсказки</b><br>Включение/скрытие подсказок для ученика</span></p>
+                    <form id="frm-statistic">
+                        <input type="checkbox" name="option1" id="pnt" value="a1">Количество вершин
+                        <input type="checkbox" name="option2" id="rbr" value="a2">Количество ребер
+                        <input type="checkbox" name="option3" id="cntc" value="a3">Количество компонент связности
+                        <input type="checkbox" name="option4" id="cclm" value="a4">Цикломатическое число
+                        <input type="checkbox" name="option5" id="doud" value="a5">Двудольность
+                        <input type="checkbox" name="option5" id="tr" value="a5">Дерево
+                        <input type="checkbox" name="option5" id="wdo" value="a5">Лес
+                        <input type="checkbox" name="option5" id="cyc" value="a5">Наличие циклов
+                        <input type="checkbox" name="option5" id="bicon" value="a5">Двусвязность
+                    </form>
+                    <p href="#" class="tooltip">Тип задачи (?)<span><b>Тип задачи</b><br>Выбор типа задачи</span></p>
+                    <input id="pa" type="checkbox">
                 </div>
                 <input type="button" class="btn-tsk" id="create-task" value="Создать">
             </div>
+            <div class="modules hiden">
+                <h3>Модули</h3>
+                <p>Данный конструктор задач имеет возможность расширения. Вы можете напрямую влиять на круг потенциальных задач, создавая новые модули на графах.</p>
+                <p>Что из себя представляет модуль для данного симулятора? Модуль - это функция на языке JavaScript, вычисляющая какие-либо полезные характеристики на графах(например двудольность, количество ребер и т.д.) Включенный модуль позволяет составлять задачи с новыми характеристиками.</p>
+                <p>Разработчик нового модуля имеет возможность пользоваться уже реализованными функциями и глобальными объектами.</p>
+                <p>Для разработки нового модуля Вам потребуется знания: API, JavaScript, внутренней реализации графа</p>
+                <h3>Реализация графа. Класс Graph</h3>
+                <p>Граф представляет собой объект класс Graph, который имеет главное информативное поле:</p>
+                <p>nodeHash - представляет собой хранилище(в виде псевдомассива, хеш-таблицы) для вершин графа</p>
+               <pre>
+Пример перебора графа:
+for(let key in graph.nodeHash){
+    console.log(graph.nodeHash[key]);
+}
+                </pre>
+                <p>Глобальный объект graph является экземпляром класса Graph и доступен для использования в Вашем модуле</p>
+                <p>Элементами nodeHash, как говорилось выше, являются вершины. Вершины представляют собой экземпляры класса Node</p>
+                <h3>Реализация графа. Класс Node</h3>
+                <p>Класс Node реализует вершины графа. Реализация объекта Node имеет следующие доступные поля:</p>
+               <pre>
+name - имя вершины( по умолчанию пустая строка)
+color - цвет вершины
+weight - вес вершины( по умолчанию null)
+roads - массив ребер данной вершины( по умолчанию [])
+                </pre>
+                <pre>
+Пример перебора графа c выводом свойств вершин:
+for(let key in graph.nodeHash){
+    console.log(graph.nodeHash[key].name,
+            graph.nodeHash[key].color,
+            graph.nodeHash[key].weight);
+}
+                </pre>
+                <p>Свойство roads, как говорилось ранее, является хранилищем ребер/путей данной вершины. Элементы массива roads представляют собой экземпляры класса Path</p>
+                <pre>
+Пример перебора графа c выводом всех ребер
+для очередной вершины:
+for(let key in graph.nodeHash){
+    for(let i = 0;i&lt;graph.nodeHash[key].roads.length;i++){
+        console.log(graph.nodeHash[key].roads[i]);
+    }
+}
+                </pre>
+                <h3>Реализация графа. Класс Path</h3>
+                <p>Класс Path реализует ребра графа. Реализация объекта Path имеет следующие доступные поля:</p>
+                <pre>
+name - имя ребра
+color - цвет ребра
+weight - вес ребра
+to - ключ вершины (вершины, к которой строится ребро)
+in - ключ вершины (вершины, из которой строится ребро)
+                </pre>
+                <p>Пример обхода в глубину графа с вычислением числа компонент связности:</p>
+                <pre>
+getConnectComponentCount(){
+    let checkedNode = [];
+    let count = 0;
+    for(let key in graph.nodeHash){
+        if(!checkedNode.includes(graph.nodeHash[key])) {
+            this.dfs(graph.nodeHash[key], checkedNode);
+            count++;
+        }
+    }
+    return count;
+}
+dfs(node, arrChecked){
+    arrChecked.push(node);
+    for(let i = 0;i&lt;node.roads.length;i++){
+        let key = node.roads[i].to;
+        if(!arrChecked.includes(graph.nodeHash[key])){
+            this.dfs(this.nodeHash[key], arrChecked);
+        }
+    }
+}
+                </pre>
+                <h3>Предупреждения</h3>
+                <p>Все перечисленные выше поля и глобальные переменные открыты только на ЧТЕНИЕ. Изменение текущего состояния графа может привести к неправильно работе всей программы. Все элементы графа являются ссылочными типами. Помимо этого запрещено использовать кросс-доменные запросы в своих модулях. Новосозданные модули встраиваются в систему только после проверки.</p>
+                <h3>Пример создания модуля</h3>
+                <p>Создадим текстовый файл newmoduleN.txt(название произвольно)</p>
+                <p>Запишем в файл следующий код:</p>
+                <pre>
+function isRegular(){
+    let arr = [];
+    for(let key in graph.nodeHash){
+        arr.push(graph.nodeHash[key].roads.length);
+    }
+    let curr = arr[0];
+    let result = arr.find(item => item != curr);
+    return !result;
+}
+                </pre>
+                <p>Данный модуль определяет является ли граф регулярным. Здесь используются вспомогательные переменные и глобальная переменная graph, доступная из глобальной области.</p>
+                <p>После создания файла с кодом, требуется также создать текстовой описание данного модуля.</p>
+                <p>Создадим файл description.txt и поместим следующий текст:</p>
+                <p>Данный модуль определяет является ли граф регулярным. Возвращает true, если граф регулярный, иначе false.</p>
+                <p>Два данных файла загружаются в форму.</p>
+                <h3>Загрузка модуля</h3>
+                <form id="upload-container" method="POST" action="send.php">
+                    <div>
+                        <p>Модуль</p>
+                        <input id="file-input-module" type="file" name="file">
+                    </div>
+                    <div>
+                        <p>Описание</p>
+                        <input id="file-input-desc" type="file" name="file">
+                    </div>
+                    <input type="submit">
+                </form>
+                <p></p>
+            </div>
             <div class="actions hiden">
-                <div class="rule">
+                <table>
+                    <tr>
+                        <td>T</td>
+                        <td><span>Построить</span> - инструмент для единичного построения вершин.</td>
+                    </tr>
+                    <tr>
+                        <td>S</td>
+                        <td><span>Выделение/Перемещение</span> - перемещение вершины при зажатой ЛКМ. При нажатие ПКМ над объектом становятся доступны его настройки.</td>
+                    </tr>
+                    <tr>
+                        <td>M</td>
+                        <td><span>Множественное построение</span> - Состоит из ребер, которые последовательно соединяют выделенные или созданные вершины. Чтобы закончить построение нажмите Enter.</td>
+                    </tr>
+                    <tr>
+                        <td>P</td>
+                        <td><span>Построить</span> - инструмент для создания ребра. Последовательно выберите две любые вершины для их соединения.</td>
+                    </tr>
+                    <tr>
+                        <td>D</td>
+                        <td><span>Удаление</span> - инструмент для удаления ребер/вершин. Выберите элемент для его удаления, при удалении вершины также удаляются все его ребра.</td>
+                    </tr>
+                    <tr>
+                        <td>С</td>
+                        <td><span>Очистка</span> - полностью очищает холст.</td>
+                    </tr>
+                    <tr>
+                        <td>&lt;</td>
+                        <td><span>Отменить</span> - отменяет последнее действие.</td>
+                    </tr>
+                    <tr>
+                        <td>&gt;</td>
+                        <td><span>Вернуть</span> - возвращает последнее отмененное действие.</td>
+                    </tr>
+                </table>
+                <!--<div class="rule">
                     <p>Создание вершины</p>
                     <span>Клик ЛКМ по холсту</span>
                 </div>
@@ -145,7 +364,7 @@
                 <div class="rule">
                     <p>Создание ребра</p>
                     <span>Клик ЛКМ по 2 произвольным вершинам</span>
-                </div>
+                </div>-->
             </div>
             <div class="programms hiden">
                 <span>О программе</span>
@@ -153,8 +372,44 @@
                     каждой конкретной задаче присвоены определенные действия(нажатия кнопок мыши и прочие).Посмотреть текущие назначения для данной задачи можно в вкладке "Действия".
                 </p>
             </div>
+            <div class="api-block">
+                <h3>API</h3>
+                <p>Доступные функции и объекты для разработки модулей</p>
+                <div class="api-elem dev">
+                    <p>graph - глобальный объект, реализующий граф. graph.nodeHash - коллекция вершин графа.</p>
+                </div>
+                <div class="api-elem dev">
+                    <p>getCountPath() - метод глобального объекта graph, возвращающий количество ребер</p>
+                </div>
+                <div class="api-elem dev">
+                    <p>getCountNodes() - метод глобального объекта graph, возвращающий количество вершин</p>
+                </div>
+                <div class="api-elem dev">
+                    <p>getConnectComponentCount() - метод глобального объекта graph, возвращающий число компонент связности</p>
+                </div>
+                <div class="api-elem dev">
+                    <p>getCyclomaticNumber() - метод глобального объекта graph, возвращающий цикломатическое число</p>
+                </div>
+                <div class="api-elem dev">
+                    <p>isCycle() - метод глобального объекта graph, возвращающий true при наличии циклов, иначе false</p>
+                </div>
+                <div class="api-elem dev">
+                    <p>isTree() - метод глобального объекта graph, возвращающий true если граф является деревом, иначе false</p>
+                </div>
+                <div class="api-elem dev">
+                    <p>isWood() - метод глобального объекта graph, возвращающий true если граф является лесом, иначе false</p>
+                </div>
+                <div class="api-elem dev">
+                    <p>isDicotyledonous() - метод глобального объекта graph, возвращающий true если граф является двудольным, иначе false</p>
+                </div>
+                <div class="api-elem dev">
+                    <p>isBiconnected() - метод глобального объекта graph, возвращающий true если граф является двусвязным, иначе false</p>
+                </div>
+                <div class="api-elem dev">
+                    <p>isRegular() - метод глобального объекта graph, возвращающий true если граф является регулярным, иначе false</p>
+                </div>
+            </div>
 
-            <input type="button" class="btn-tsk" id="load-solution" value="Отправить на проверку">
         </div>
 
     </div>
