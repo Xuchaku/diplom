@@ -1,10 +1,10 @@
 const WIDTH_CNV = 640;
 const HEIGHT_CNV = 480;
-const DEFAULT_COLOR_CNV = "rgb(36,37,43)";
+const DEFAULT_COLOR_CNV = "rgb(253,253,253)";
 
 let gl = 0;
 let globalConfig = {
-    radius: 10
+    radius: 5
 };
 let props = {
     leftClickMouse: null,
@@ -1403,7 +1403,7 @@ class Graph{
     }
 }
 class Node{
-    constructor(name,x,y, radius = globalConfig.radius, color = "#ccc", weight = null){
+    constructor(name,x,y, radius = globalConfig.radius, color = "red", weight = null){
         this.name = name;
         this.color = color;
         this.radius = radius;
