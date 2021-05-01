@@ -10,7 +10,8 @@ let props = {
     leftClickMouse: null,
     rightClickMouse: null
 };
-
+let serverloader = null;
+let embedmodule = null;
 let isConstruct = true;
 let menuLeft;
 let graph;
@@ -26,7 +27,60 @@ let colors = ["black", "blue", "red", "yellow", "purple", "white", "green", "ora
 function invert(value){
     return value == 1 ? 2 : 1;
 }
+class EmbededModule{
+    constructor() {
+        this.containerParams = document.querySelector(".task-lst");
+        this.funcStorage = [];
+    }
+    embed(conf){
+        for(let i = 0;i<conf.length;i++){
+            let elemToParams = document.createElement('div');
+            elemToParams.className = "val";
+            switch (conf[i].type) {
+                case "boolean":elemToParams.innerHTML = `
+                    <label data-title="Числовой параметр" for="">${conf[i].name}</label>
+                    <input type="checkbox">
+                `;console.log("here");break;
+                case "integer":elemToParams.innerHTML = `
+                        <label data-title="Числовой параметр" for="">${conf[i].name} (<i>число</i>)</label>
+                        <input type="text" class="value-for-task">
+                    `;break;
+            }
+            this.containerParams.append(elemToParams);
+        }
+    }
+    initfunc(modulesrc){
+        console.log("HERE");
+        for(let i =0;i<modulesrc.length;i++) {
+            this.funcStorage.push(eval(modulesrc[i].script));
+        }
 
+    }
+}
+class ServerConnector{
+    constructor() {
+        this.host = "http://localhost:8000/";
+        this.pathmodules = "getmodules";
+        this.modul = [];
+    }
+    async loadmodules(){
+        let response = await fetch(this.host + this.pathmodules);
+
+        if (response.ok) {
+            let txt = await response.text();
+            let data = JSON.parse(txt);
+            for(let i = 0;i<data.length;i++)
+                this.modul.push(data[i]);
+            console.log(this.modul);
+        } else {
+            alert("Ошибка HTTP: " + response.status);
+        }
+    }
+    run(){
+        //let fun = eval(this.modul);
+        //fun();
+    }
+}
 function changeColorCanvas(x,y){
     gl++;
     for(let key in graph.nodeHash){
@@ -305,6 +359,7 @@ class Statistics{
         this.statisticElem.children[6].children[0].innerText = graph.isWood();
         this.statisticElem.children[7].children[0].innerText = graph.isCycle();
         this.statisticElem.children[8].children[0].innerText = graph.isBiconnected();
+        this.statisticElem.children[9].children[0].innerText = graph.isRegular();
     }
     setParam(prp){
         this.prps = prp;
@@ -418,6 +473,13 @@ class MenuPropertyGraph{
         this.checkDicotyledonousElem.checked = graph.isDicotyledonous();
         this.biconnectElem.checked = graph.isBiconnected();
         this.checkedRegularElem.checked = graph.isRegular();
+
+        let wrapper = document.querySelector(".task-lst");
+        let j = 0;
+        for(let i = 12;i< wrapper.children.length;i++){
+            wrapper.children[i].children[1].checked = embedmodule.funcStorage[j]();
+            j++;
+        }
         statistics.update(this);
         this.updateText();
     }
@@ -1150,9 +1212,10 @@ class Graph{
         for(let key in this.nodeHash){
             arr.push(this.nodeHash[key].roads.length);
         }
+        console.log(arr);
         let curr = arr[0];
         let result = arr.find(item => item != curr);
-        return !result;
+        return result == undefined;
     }
     isDicotyledonous(){
         this.isDicotyleds = true;
@@ -1489,7 +1552,10 @@ class Path{
         //history.update(graph.nodeHash);
     }
 }
-window.addEventListener("load",()=>{
+window.addEventListener("load",async ()=>{
+    serverloader = new ServerConnector();
+    embedmodule = new EmbededModule();
+    await serverloader.loadmodules();
     menuProperty = new MenuPropertyGraph();
     cnv = new CNV();
     graph = new Graph();
@@ -1498,10 +1564,13 @@ window.addEventListener("load",()=>{
     historyAct = new HistoryAction();
     menuLeft = new Menu();
     statistics = new Statistics();
+    console.log("T");
     cnv.clear();
     cnv.register();
     history.update(graph.nodeHash);
-
+    embedmodule.embed(serverloader.modul);
+    embedmodule.initfunc(serverloader.modul);
+    //serverloader.run();
     requestAnimationFrame(loop);
     initElems();
 });
