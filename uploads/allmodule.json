@@ -1,0 +1,12 @@
+{"modules":[{
+  "name": "Name",
+  "desc": "Bla bla bla bla",
+  "type": "boolean",
+  "script": "(function m(){return graph.getCountPath() > 7})"
+},
+  {
+    "name": "Name",
+    "desc": "Bla bla bla bla",
+    "type": "boolean",
+    "script": "(function m(){return graph.getCountPath() > 3})"
+  }]}

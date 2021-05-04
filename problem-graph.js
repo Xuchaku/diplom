@@ -24,30 +24,89 @@ let historyAct;
 
 
 let colors = ["black", "blue", "red", "yellow", "purple", "white", "green", "orange"];
+Object.defineProperty(String.prototype, 'hashCode', {
+    value: function() {
+        let hash = 0, i, chr;
+        for (i = 0; i < this.length; i++) {
+            chr   = this.charCodeAt(i);
+            hash  = ((hash << 5) - hash) + chr;
+            hash |= 0; // Convert to 32bit integer
+        }
+        return hash;
+    }
+});
 function invert(value){
     return value == 1 ? 2 : 1;
+}
+class Task{
+    constructor(type, prps, hints) {
+        this.type = type;
+        this.id = (new Date()).toString().hashCode();
+        this.description = document.querySelector("#text-newtask").innerText;
+        this.actionMouse = JSON.parse(JSON.stringify(prps));
+        this.hints = hints.slice();
+        this.option = {};
+        this.loadoption();
+    }
+    loadoption(){
+        let taskLst = document.querySelector(".task-lst");
+        switch (this.type) {
+            case 1:{
+                for(let i = 0;i<taskLst.children.length;i++){
+                    if(taskLst.children[i].children[2].children[0].checked){
+                        console.log(taskLst.children[i].children[1]);
+                        let key = taskLst.children[i].children[1].id;
+                        let value = taskLst.children[i].children[1].value;
+                        this.option[key] = value;
+                    }
+                }
+            };break;
+            case 2:break;
+        }
+    }
+
 }
 class EmbededModule{
     constructor() {
         this.containerParams = document.querySelector(".task-lst");
+        this.frmstatistic = document.querySelector("#frm-statistic");
+        this.statisticUser = document.querySelector(".statistic");
+        this.apiBlock = document.querySelector(".api-block");
         this.funcStorage = [];
     }
     embed(conf){
         for(let i = 0;i<conf.length;i++){
             let elemToParams = document.createElement('div');
+            let statisticElem = document.createElement('p');
+            statisticElem.innerHTML =  `${conf[i].name} <span></span>`;
+            this.statisticUser.append(statisticElem);
+            let option = document.createElement('input');
+            option.type = "checkbox";
+            option.className = "value-for-task";
+            this.frmstatistic.append(option);
+            this.frmstatistic.append(conf[i].name);
+            let apiElem = document.createElement('div');
+            apiElem.className = "api-elem dev";
+            apiElem.innerHTML = `<p>${conf[i].name}() - ${conf[i].desc}. Возвращает тип ${conf[i].type}</p>`;
+            this.apiBlock.append(apiElem);
             elemToParams.className = "val";
             switch (conf[i].type) {
-                case "boolean":elemToParams.innerHTML = `
-                    <label data-title="Числовой параметр" for="">${conf[i].name}</label>
-                    <input type="checkbox">
-                `;console.log("here");break;
-                case "integer":elemToParams.innerHTML = `
-                        <label data-title="Числовой параметр" for="">${conf[i].name} (<i>число</i>)</label>
+                case "boolean":elemToParams.innerHTML = `<label data-title="Числовой параметр" for="">${conf[i].name}</label>
+                        <input type="checkbox" class="value-for-task">
+                        <div class="task-config">
+                            <input type="checkbox">
+                            <p href="#" class="tooltip">(?)<span><b>Действия</b><br>Включить данный параметр в задачу?</span></p>
+                        </div>`;console.log("here");break;
+                case "integer":elemToParams.innerHTML = ` <label data-title="Числовой параметр" for="">${conf[i].name} (<i>число</i>)</label>
                         <input type="text" class="value-for-task">
-                    `;break;
+                        <div class="task-config">
+                            <input type="checkbox">
+                            <p href="#" class="tooltip">(?)<span><b>Действия</b><br>Включить данный параметр в задачу?</span></p>
+                        </div>`;break;
             }
             this.containerParams.append(elemToParams);
         }
+
     }
     initfunc(modulesrc){
         console.log("HERE");
@@ -60,25 +119,50 @@ class EmbededModule{
 class ServerConnector{
     constructor() {
         this.host = "http://localhost:8000/";
-        this.pathmodules = "getmodules";
+        this.urlgetmodules = "getmodules";
+        this.urlsetmodules = "setmodule";
+        this.urlgettask = "gettask";
+        this.urlloadtask = "settask";
         this.modul = [];
     }
-    async loadmodules(){
-        let response = await fetch(this.host + this.pathmodules);
+    async gettask(){
+        let fetchResponse = await fetch(this.host + this.urlgettask, {
+            method: 'GET',
+        });
+        let txt = await fetchResponse.text();
+        let data = JSON.parse(txt);
+        return data;
 
-        if (response.ok) {
-            let txt = await response.text();
-            let data = JSON.parse(txt);
-            for(let i = 0;i<data.length;i++)
-                this.modul.push(data[i]);
-            console.log(this.modul);
-        } else {
-            alert("Ошибка HTTP: " + response.status);
-        }
+    }
+    async loadtask(data){
+        let fetchResponse = await fetch(this.host + this.urlloadtask, {
+            method: 'POST',
+            body: JSON.stringify(data)
+        });
+        await fetchResponse.text();
+    }
+    async loadsolution(){
+
+    }
+    async getmodules(){
+        let fetchResponse = await fetch(this.host + this.urlgetmodules, {
+            method: 'GET',
+        });
+        let txt = await fetchResponse.text();
+        let data = JSON.parse(txt);
+        for(let i = 0;i<data.length;i++)
+            this.modul.push(data[i]);
     }
     run(){
         //let fun = eval(this.modul);
         //fun();
+    }
+    async loadmodule(data){
+        let fetchResponse = await fetch(this.host + this.urlsetmodules, {
+            method: 'POST',
+            body: new FormData(data)
+        });
+        await fetchResponse.text();
     }
 }
 function changeColorCanvas(x,y){
@@ -182,6 +266,7 @@ function setPropertyPath(to, ins, value, func){
         }
     }
     history.update(graph.nodeHash);
+    console.log("!!!!!!");
 }
 class HistoryAction{
     constructor(){
@@ -299,9 +384,9 @@ class History{
                 roads.push(graph.nodeHash[key].roads[i]);
             }
             //roads = JSON.stringify(roads);
-            graph.nodeHash[key] = new Node(graph.nodeHash[key].name,graph.nodeHash[key].x,graph.nodeHash[key].y, graph.nodeHash[key].radius ,graph.nodeHash[key].color, graph.nodeHash[key].weight);
+            graph.nodeHash[key] = new Node(graph.nodeHash[key].name,graph.nodeHash[key].x,graph.nodeHash[key].y, graph.nodeHash[key].radius ,graph.nodeHash[key].color, graph.nodeHash[key].weight,graph.nodeHash[key].isActive);
             for(let i =0;i< roads.length;i++){
-                graph.nodeHash[key].roads.push(new Path(roads[i].name, roads[i].in, roads[i].to, roads[i].xStart, roads[i].yStart, roads[i].xEnd, roads[i].yEnd, roads[i].width, roads[i].stylePath ,roads[i].weight ,roads[i].color));
+                graph.nodeHash[key].roads.push(new Path(roads[i].name, roads[i].in, roads[i].to, roads[i].xStart, roads[i].yStart, roads[i].xEnd, roads[i].yEnd, roads[i].width, roads[i].stylePath ,roads[i].weight ,roads[i].color,false, roads[i].isActive));
             }
             //graph.nodeHash[key].roads = JSON.parse(roads);
             roads = [];
@@ -323,10 +408,10 @@ class History{
                     roads.push(graph.nodeHash[key].roads[i]);
                 }
                 //roads = JSON.stringify(roads);
-                graph.nodeHash[key] = new Node(graph.nodeHash[key].name,graph.nodeHash[key].x,graph.nodeHash[key].y, graph.nodeHash[key].radius , graph.nodeHash[key].color, graph.nodeHash[key].weight);
+                graph.nodeHash[key] = new Node(graph.nodeHash[key].name,graph.nodeHash[key].x,graph.nodeHash[key].y, graph.nodeHash[key].radius , graph.nodeHash[key].color, graph.nodeHash[key].weight, graph.nodeHash[key].isActive);
                 //graph.nodeHash[key].roads = JSON.parse(roads);
                 for(let i =0;i< roads.length;i++){
-                    graph.nodeHash[key].roads.push(new Path(roads[i].name, roads[i].in, roads[i].to, roads[i].xStart, roads[i].yStart, roads[i].xEnd, roads[i].yEnd, roads[i].width,roads[i].stylePath ,roads[i].weight,roads[i].color));
+                    graph.nodeHash[key].roads.push(new Path(roads[i].name, roads[i].in, roads[i].to, roads[i].xStart, roads[i].yStart, roads[i].xEnd, roads[i].yEnd, roads[i].width,roads[i].stylePath ,roads[i].weight,roads[i].color,false, roads[i].isActive));
                 }
                 roads = [];
             }
@@ -360,6 +445,12 @@ class Statistics{
         this.statisticElem.children[7].children[0].innerText = graph.isCycle();
         this.statisticElem.children[8].children[0].innerText = graph.isBiconnected();
         this.statisticElem.children[9].children[0].innerText = graph.isRegular();
+
+        let j = 0;
+        for(let i = 10;i< this.statisticElem.children.length;i++){
+            this.statisticElem.children[i].children[0].innerText = embedmodule.funcStorage[j]();
+            j++;
+        }
     }
     setParam(prp){
         this.prps = prp;
@@ -384,7 +475,8 @@ class MenuPropertyGraph{
       this.rkmElem = document.querySelector("#rkm");
       this.paElem = document.querySelector("#pa");
       this.formStatistic = document.querySelector("#frm-statistic");
-      this.elemNewTaskText = document.querySelector(".newtask");
+      this.elemNewTaskText = document.querySelector("#text-newtask");
+      this.areaTextElem =  document.querySelector("#text-area");
       this.init();
     }
     init(){
@@ -397,8 +489,9 @@ class MenuPropertyGraph{
             selectRight = this.rkmElem.value;
         });
         this.paElem.addEventListener("change", ()=>{
-            if(this.paElem.checked)
+            if(this.paElem.checked) {
                 this.elemNewTaskText.style.display = "none";
+            }
             else{
                 this.elemNewTaskText.style.display = "block";
             }
@@ -407,16 +500,16 @@ class MenuPropertyGraph{
             if(selectLeft == selectRight)
                 console.log("ERROR");
             else{
-                isConstruct = false;
+                //isConstruct = false;
                 let prps = [];
                 for(let i =0;i<this.formStatistic.children.length;i++){
                     prps.push(this.formStatistic.children[i].checked);
                 }
                 console.log(prps);
-                menuLeft.hidden();
+                //menuLeft.hidden();
                 historyAct.clear();
-                statistics.setParam(prps);
-                statistics.toggle();
+                //statistics.setParam(prps);
+                ///statistics.toggle();
 
                 //false = tip1
                 //true = tip2
@@ -431,6 +524,10 @@ class MenuPropertyGraph{
                     graph = new Graph();
                     props.leftClickMouse = selectLeft;
                     props.rightClickMouse = selectRight;
+
+                    let newTask = new Task(1, props, prps);
+                    console.log(newTask);
+                    serverloader.loadtask(newTask);
                     statistics.update();
                 }
             }
@@ -441,7 +538,7 @@ class MenuPropertyGraph{
 
     }
     updateText(){
-        this.elemNewTaskText.innerHTML = "<p id=\"text-newtask\">Постройте граф удовлетворяющий следующим свойствам:</p>";
+        this.elemNewTaskText.innerHTML = "<p>Постройте граф удовлетворяющий следующим свойствам:</p>";
         this.elemNewTaskText.innerHTML += "<p>Количество вершин: " + this.nodesElemCount.value + "</p>";
         this.elemNewTaskText.innerHTML += "<p>Количество ребер: " + this.pathElemCount.value + "</p>";
         this.elemNewTaskText.innerHTML += "<p>Количество компонент связоности: " + this.connectElemCount.value + "</p>";
@@ -453,6 +550,14 @@ class MenuPropertyGraph{
         this.elemNewTaskText.innerHTML += this.biconnectElem.checked ? "<p>Двусвязный</p>" : "";
         this.elemNewTaskText.innerHTML += this.checkedRegularElem.checked ? "<p>Регулярный</p>" : "";
 
+        let wrapper = document.querySelector(".task-lst");
+        let j = 0;
+        let len = wrapper.children.length;
+        for(let i = len - embedmodule.funcStorage.length;i< wrapper.children.length;i++){
+            console.log(wrapper.children[i].children[1].checked);
+            this.elemNewTaskText.innerHTML += wrapper.children[i].children[1].checked ? `<p>${serverloader.modul[j].name}</p>` : "";
+            j++;
+        }
     }
 
     update(action){
@@ -476,7 +581,8 @@ class MenuPropertyGraph{
 
         let wrapper = document.querySelector(".task-lst");
         let j = 0;
-        for(let i = 12;i< wrapper.children.length;i++){
+        let len = wrapper.children.length;
+        for(let i = len - embedmodule.funcStorage.length;i< wrapper.children.length;i++){
             wrapper.children[i].children[1].checked = embedmodule.funcStorage[j]();
             j++;
         }
@@ -681,7 +787,7 @@ class Menu{
         this.mode = 0;
         this.init();
     }
-    hidden(){
+    toggle(){
         this.mainElem.style.display = isConstruct ? "flex" : "none";
     }
     init(){
@@ -720,7 +826,8 @@ class Menu{
         });
         this.elemClear.addEventListener("click", ()=>{
             graph = new Graph();
-            history.clear();
+            history.update(graph.nodeHash);
+            //history.clear();
         });
     }
 
@@ -1466,11 +1573,11 @@ class Graph{
     }
 }
 class Node{
-    constructor(name,x,y, radius = globalConfig.radius, color = "red", weight = null){
+    constructor(name,x,y, radius = globalConfig.radius, color = "red", weight = null, active = true){
         this.name = name;
         this.color = color;
         this.radius = radius;
-        this.isActive = true;
+        this.isActive = active;
         this.isConfig = false;
         this.isSelected = false;
         this.x = x;
@@ -1497,6 +1604,7 @@ class Node{
     }
     setActive(){
         this.isActive = !this.isActive;
+        history.update(graph.nodeHash);
         historyAct.update("setActive", this.isActive, this);
     }
     setWeight(value){
@@ -1506,11 +1614,11 @@ class Node{
     }
 }
 class Path{
-    constructor(name,namein,nameto,x1,y1,x2,y2,width,stylePath = [0],weight = null,color ="black",select = false) {
+    constructor(name,namein,nameto,x1,y1,x2,y2,width,stylePath = [0],weight = null,color ="black",select = false, active = true) {
         this.to = nameto;
         this.in = namein;
         this.name = name;
-        this.isActive = true;
+        this.isActive = active;
         this.width = width;
         this.color = color;
         this.xStart = x1;
@@ -1555,7 +1663,7 @@ class Path{
 window.addEventListener("load",async ()=>{
     serverloader = new ServerConnector();
     embedmodule = new EmbededModule();
-    await serverloader.loadmodules();
+    await serverloader.getmodules();
     menuProperty = new MenuPropertyGraph();
     cnv = new CNV();
     graph = new Graph();
@@ -1578,18 +1686,38 @@ window.addEventListener("scroll", ()=>{
     if(cnv)
         cnv.init();
 });
+async function preGetTask(elemHTMLTask) {
+    let taskOption = await serverloader.gettask();
+    console.log(taskOption);
+    elemHTMLTask.children[0].innerText = `Задача #${taskOption["id"]}`;
+    elemHTMLTask.children[1].innerText = `${taskOption["description"]}`;
+
+    isConstruct = false;
+    menuLeft.toggle();
+    historyAct.clear();
+    statistics.setParam(taskOption["hints"]);
+    statistics.toggle();
+    props.leftClickMouse = taskOption["actionMouse"].leftClickMouse;
+    props.rightClickMouse = taskOption["actionMouse"].rightClickMouse;
+    history.clear();
+    graph = new Graph();
+
+}
 function initElems(){
     let task_elem = document.querySelector("#tsk");
     let info_elem = document.querySelector("#act");
     let programm_elem = document.querySelector("#prg");
     let module_elem = document.querySelector("#mdl");
     let api_elem = document.querySelector("#api");
+    let task_learn_elem = document.querySelector("#lrn");
 
     let taskShow = document.querySelector(".tasks");
     let infoShow = document.querySelector(".actions");
     let programmShow = document.querySelector(".programms");
     let modulesShow = document.querySelector(".modules");
     let apiShow = document.querySelector(".api-block");
+    let newTaskShow = document.querySelector(".task-text");
+
     taskShow.style.display = "flex";
     task_elem.addEventListener("click", ()=>{
         taskShow.style.display = "flex";
@@ -1597,6 +1725,13 @@ function initElems(){
         programmShow.style.display = "none";
         modulesShow.style.display = "none";
         apiShow.style.display = "none";
+        newTaskShow.style.display = "none";
+        isConstruct = true;
+        menuLeft.toggle();
+        historyAct.clear();
+        statistics.toggle();
+        history.clear();
+        graph = new Graph();
     });
     info_elem.addEventListener("click", ()=>{
         infoShow.style.display = "flex";
@@ -1604,6 +1739,7 @@ function initElems(){
         programmShow.style.display = "none";
         modulesShow.style.display = "none";
         apiShow.style.display = "none";
+        newTaskShow.style.display = "none";
     });
     programm_elem.addEventListener("click", ()=>{
         programmShow.style.display = "flex";
@@ -1611,6 +1747,7 @@ function initElems(){
         taskShow.style.display = "none";
         modulesShow.style.display = "none";
         apiShow.style.display = "none";
+        newTaskShow.style.display = "none";
     });
     module_elem.addEventListener("click", ()=>{
         modulesShow.style.display = "flex";
@@ -1618,6 +1755,7 @@ function initElems(){
         taskShow.style.display = "none";
         programmShow.style.display = "none";
         apiShow.style.display = "none";
+        newTaskShow.style.display = "none";
     });
     api_elem.addEventListener("click", ()=>{
         apiShow.style.display = "flex";
@@ -1625,7 +1763,90 @@ function initElems(){
         taskShow.style.display = "none";
         programmShow.style.display = "none";
         modulesShow.style.display = "none";
+        newTaskShow.style.display = "none";
     });
+    task_learn_elem.addEventListener("click", ()=>{
+        newTaskShow.style.display = "flex";
+        modulesShow.style.display = "none";
+        infoShow.style.display = "none";
+        taskShow.style.display = "none";
+        programmShow.style.display = "none";
+        apiShow.style.display = "none";
+        preGetTask(newTaskShow);
+    });
+
+    let editElem = document.querySelector("#edit");
+    let area = document.querySelector("#text-area");
+    let flag_area = false;
+    editElem.addEventListener("click", ()=>{
+        let textTaskElem = document.querySelector("#text-newtask");
+        let text = "";
+        flag_area = !flag_area;
+        area.style.display = flag_area ? "block" :"none";
+        textTaskElem.style.display = !flag_area ? "block" : "none";
+        for(let i = 0;i<textTaskElem.children.length;i++){
+            text += textTaskElem.children[i].innerText + "\n";
+        }
+        if(flag_area)
+            area.value = text;
+        if(!flag_area){
+            let currentText = document.querySelector("#text-area");
+            console.log(currentText.value);
+            let arrText = currentText.value.split("\n");
+            textTaskElem.innerHTML = "";
+            for(let i  =0;i<arrText.length;i++){
+                textTaskElem.innerHTML += `<p>${arrText[i]}</p>`;
+            }
+        }
+    });
+
+    let loadModuleElem = document.querySelector("#loadmodule");
+    loadModuleElem.addEventListener("click", async (e)=>{
+        e.preventDefault();
+        let file = document.querySelector("#file-input-module").files[0];
+        let reader = new FileReader();
+        reader.readAsText(file);
+        reader.addEventListener("load",async()=>{
+            let jsonmodule = JSON.parse(reader.result);
+            if(jsonmodule["name"] && jsonmodule["type"] && jsonmodule["desc"] && jsonmodule["script"]){
+                /*
+                let gl = 0;
+                let globalConfig = {
+                    radius: 5
+                };
+                let props = {
+                    leftClickMouse: null,
+                    rightClickMouse: null
+                };
+                let serverloader = null;
+                let embedmodule = null;
+                let isConstruct = true;
+                let menuLeft;
+                let graph;
+                let cnv;
+                let menu;
+                let menuProperty;
+                let history;
+                let statistics;
+                let historyAct;
+                */
+                let regexp = /graph=|graph =|globalConfig|props|serverloader|embedmodule|isConstruct|menuLeft|cnv|menu|menuProperty|history|statistics|colors|globalConfig|graph\.nodeHash\[[a-z][a-z0-9]*] =|graph\.nodeHash\[[a-z][a-z0-9]*]=/;
+                if(!jsonmodule["script"].match(regexp) && (jsonmodule["type"] == "boolean" || jsonmodule["type"] == "integer")){
+                    console.log("УСПЕХ");
+                    let formData = document.querySelector("#upload-container");
+                    await serverloader.loadmodule(formData);
+                }
+            }
+
+
+        });
+
+
+        //let file = document.querySelector("#file-input-module");
+        //console.log(file.files[0]);
+
+    });
+
 }
 function loop(){
     graph.showGraph();

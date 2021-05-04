@@ -370,10 +370,20 @@
     margin-bottom: 15px;
     display: flex;
     flex-direction: column;
+    position: relative;
 
 }
-.newtask span{
+#edit{
+    position: absolute;
+    right: 0;
+    top:0;
+    width: 24px;
+    height: 24px;
+    z-index: 5;
+}
+.newtask .tooltip{
     color: black;
+    font-size: 16px;
     font-weight: bold;
     border: 1px solid #ccc;
     /* Permalink - use to edit and share this gradient: https://colorzilla.com/gradient-editor/#f2f6f8+0,d8e1e7+50,b5c6d0+51,e0eff9+100;Grey+Gloss+%232 */
@@ -530,7 +540,7 @@
 .form_radio_group label:hover {
     color: #666;
 }
-input[type="checkbox"]{
+input[type="checkbox"].value-for-task{
     appearance:none;
     width:40px;
     height:16px;
@@ -544,7 +554,7 @@ input[type="checkbox"]{
     transition: background 0.3s;
     box-sizing:border-box;
 }
-input[type="checkbox"]:after{
+input[type="checkbox"].value-for-task:after{
     content:'';
     position:absolute;
     top:-1px;
@@ -837,4 +847,11 @@ td:first-child {
     background: rgb(238,238,238);
     padding: 5px;
     margin: 5px;
+}
+.task-config{
+    display: flex;
+    flex-direction: row;
+}
+.task-config p {
+    margin: 0;
 }
