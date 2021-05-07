@@ -1,12 +1,1 @@
-{"modules":[{
-  "name": "Name",
-  "desc": "Bla bla bla bla",
-  "type": "boolean",
-  "script": "(function m(){return graph.getCountPath() > 7})"
-},
-  {
-    "name": "Name",
-    "desc": "Bla bla bla bla",
-    "type": "boolean",
-    "script": "(function m(){return graph.getCountPath() > 3})"
-  }]}
+{"modules":[{"name":"Name","desc":"Bla bla bla bla","type":"boolean","script":"(function m(){return graph.getCountPath() > 7})","verif":"ok","verifUser":"ok"},{"name":"Name","desc":"Bla bla bla bla","type":"boolean","script":"(function m(){return graph.getCountPath() > 3})","verif":"ok","verifUser":"ok"},{"name":"Name","desc":"Bla bla bla bla","type":"integer","script":"(function a(){return graph.getCountPath() > 3;graph.nodeHash[bo13dy]})","idHash":-1962189800},{"name":"Name","desc":"Bla bla bla bla","type":"boolean","script":"(function a(){return graph.getCountPath() > 3;graph.nodeHash[bo13dy]})","idHash":962867302,"verif":"ok"},{"name":"Name","desc":"Bla bla bla bla","type":"integer","script":"(function a(){return graph.getCountPath() > 3;graph.nodeHash[bo13dy]})","idHash":1188139739,"verif":"ok"},{"name":"Name","desc":"Bla bla bla bla","type":"integer","script":"(function a(){return 7;})","idHash":177513800,"verif":"ok"}]}

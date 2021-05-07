@@ -19,6 +19,7 @@
         <p id="api" >API</p>
         <p id="act">Справка</p>
         <p id="prg" >О программе</p>
+        <p id="sol">Примеры/решения</p>
     </div>
     <div class="main">
         <div class="cnv-blck">
@@ -35,6 +36,7 @@
                     <option value="5, 15">Пунткир</option>
                     <option value="1,2">Точечная</option>
                 </select>
+                <input type="button" id="all-active" value="Установить/снять выделение графа">
             </div>
             <div class="cnv-wrap">
                 <div class="button-menu">
@@ -50,34 +52,8 @@
                 <canvas id="cnv"></canvas>
             </div>
             <div class="form_radio_group">
-                <div class="form_radio_group-item">
-                    <input id="radio-1" type="radio" name="radio" value="1" checked>
-                    <label for="radio-1"></label>
-                </div>
-                <div class="form_radio_group-item">
-                    <input id="radio-2" type="radio" name="radio" value="2">
-                    <label for="radio-2"></label>
-                </div>
-                <div class="form_radio_group-item">
-                    <input id="radio-3" type="radio" name="radio" value="3">
-                    <label for="radio-3"></label>
-                </div>
-                <div class="form_radio_group-item">
-                    <input id="radio-4" type="radio" name="radio" value="4">
-                    <label for="radio-4"></label>
-                </div>
-                <div class="form_radio_group-item">
-                    <input id="radio-5" type="radio" name="radio" value="4">
-                    <label for="radio-5"></label>
-                </div>
-                <div class="form_radio_group-item">
-                    <input id="radio-6" type="radio" name="radio" value="4">
-                    <label for="radio-6"></label>
-                </div>
-                <div class="form_radio_group-item">
-                    <input id="radio-7" type="radio" name="radio" value="4">
-                    <label for="radio-7"></label>
-                </div>
+                <input type="button" id="add-color" value="+">
+                <input type="button" id="remove-color" value="-">
             </div>
             <select id="data" size="1">
                 <option value="0">Действия</option>
@@ -109,9 +85,17 @@
             <div class="task-text">
                 <span>Задача</span>
                 <p>Постройте плоский граф с 17 рёбрами и 8 вершинами и минимальным числом компонент связности</p>
+                <input type="text"  id="student-info" value="" placeholder="Ваше ФИО">
                 <input type="button" class="btn-tsk" id="load-solution" value="Отправить на проверку">
+                <div class="status-response"></div>
             </div>
             <div class="tasks hiden">
+                <p href="#" class="tooltip">Тип задачи (?)<span><b>Тип задачи</b><br>Выбор типа задачи</span></p>
+                <div class="type-task">
+                    <p>При неактивном состоянии *. Данный тип задачи предлагает участнику создать новый граф с заданными свойствами, причем граф имеющийся при создании ему недоступен. Поле "Текст новой задачи" автоматически заполняется программой, однако имеется возможность поменять условие в ручную. Стоит учитывать то, что только выбранные параметры на графах будут сверяться при решении.</p>
+                    <input id="pa" type="checkbox" class="value-for-task">
+                    <p>При активном состоянии *. Данный тип задачи предлагает участнику с помощью выделения выбрать новый подграф в качестве ответа на задачу, причем разработанный при конструировании задачи граф будет доступен для пользователя. Причем параметры графа не будут учитываться, поле "Текст новой задачи" следует самостоятельно описать условие задачи.</p>
+                </div>
                 <p href="#" class="tooltip">Конструктор задач (?)<span><b>Характеристики</b><br>Характеристик заполняются при составлении графа. Можно заполнить вручную.</span></p>
                 <div class="task-lst">
                     <div class="val">
@@ -146,14 +130,7 @@
                             <p href="#" class="tooltip">(?)<span><b>Действия</b><br>Включить данный параметр в задачу?</span></p>
                         </div>
                     </div>
-                    <div class="val">
-                        <label data-title="Числовой параметр" for="">Хроматическое число (<i>число</i>)</label>
-                        <input type="text" id="hromatic-number" class="value-for-task">
-                        <div class="task-config">
-                            <input type="checkbox">
-                            <p href="#" class="tooltip">(?)<span><b>Действия</b><br>Включить данный параметр в задачу?</span></p>
-                        </div>
-                    </div>
+
                     <div class="val">
                         <label data-title="Числовой параметр" for="">Плоский</label>
                         <input type="checkbox" id="plsk" class="value-for-task">
@@ -213,7 +190,7 @@
 
                 </div>
                 <div class="newtask">
-                    <input type="button" id="edit" value="E">
+                    <input type="button" id="edit" value="">
                     <p href="#" class="tooltip">Текст новой задачи (?)<span><b>Тип задачи</b><br>Выбор типа задачи</span></p>
                     <p id="text-newtask"></p>
                     <textarea id="text-area" class="hiden" rows="10" cols="45" name="text"></textarea>
@@ -254,13 +231,9 @@
                         <input type="checkbox" name="option5" class="value-for-task" id="bicon" value="a5">Двусвязность
                         <input type="checkbox" name="option5" class="value-for-task" id="regul" value="a5">Регулярность
                     </form>
-                    <p href="#" class="tooltip">Тип задачи (?)<span><b>Тип задачи</b><br>Выбор типа задачи</span></p>
-                    <div class="type-task">
-                        <p>При неактивном состоянии *. Данный тип задачи предлагает участнику создать новый граф с заданными свойствами, причем граф имеющийся при создании ему недоступен. Поле "Текст новой задачи" автоматически заполняется программой, однако имеется возможность поменять условие в ручную. Стоит учитывать то, что только выбранные параметры на графах будут сверяться при решении.</p>
-                        <input id="pa" type="checkbox" class="value-for-task">
-                        <p>При активном состоянии *. Данный тип задачи предлагает участнику с помощью выделения выбрать новый подграф в качестве ответа на задачу, причем разработанный при конструировании задачи граф будет доступен для пользователя. Причем параметры графа не будут учитываться, поле "Текст новой задачи" следует самостоятельно описать условие задачи.</p>
-                    </div>
+
                 </div>
+                <div class="error-task-build"></div>
                 <input type="button" class="btn-tsk" id="create-task" value="Создать">
             </div>
             <div class="modules hiden">
@@ -381,35 +354,35 @@ function isRegular(){
                 <h3>Справка</h3>
                 <table>
                     <tr>
-                        <td>T</td>
+                        <td><img class="icon-actions" src="./media/icons8-360-degrees-16.png" alt=""></td>
                         <td><span>Построить</span> - инструмент для единичного построения вершин.</td>
                     </tr>
                     <tr>
-                        <td>S</td>
+                        <td><img class="icon-actions" src="./media/icons8-move-48.png" alt=""></td>
                         <td><span>Выделение/Перемещение</span> - перемещение вершины при зажатой ЛКМ. При нажатие ПКМ над объектом становятся доступны его настройки.</td>
                     </tr>
                     <tr>
-                        <td>M</td>
+                        <td><img class="icon-actions" src="./media/icons8-graph-clique-50.png" alt=""></td>
                         <td><span>Множественное построение</span> - Состоит из ребер, которые последовательно соединяют выделенные или созданные вершины. Чтобы закончить построение нажмите Enter.</td>
                     </tr>
                     <tr>
-                        <td>P</td>
+                        <td><img class="icon-actions" src="./media/icons8-line-48.png" alt=""></td>
                         <td><span>Построить</span> - инструмент для создания ребра. Последовательно выберите две любые вершины для их соединения.</td>
                     </tr>
                     <tr>
-                        <td>D</td>
+                        <td><img class="icon-actions" src="./media/icons8-delete-48.png" alt=""></td>
                         <td><span>Удаление</span> - инструмент для удаления ребер/вершин. Выберите элемент для его удаления, при удалении вершины также удаляются все его ребра.</td>
                     </tr>
                     <tr>
-                        <td>С</td>
+                        <td><img class="icon-actions" src="./media/icons8-delete-bin-64.png" alt=""></td>
                         <td><span>Очистка</span> - полностью очищает холст.</td>
                     </tr>
                     <tr>
-                        <td>&lt;</td>
+                        <td><img class="icon-actions" src="./media/icons8-reply-arrow-60.png" alt=""></td>
                         <td><span>Отменить</span> - отменяет последнее действие.</td>
                     </tr>
                     <tr>
-                        <td>&gt;</td>
+                        <td><img class="icon-actions" src="./media/icons8-forward-arrow-100.png" alt=""></td>
                         <td><span>Вернуть</span> - возвращает последнее отмененное действие.</td>
                     </tr>
                 </table>
@@ -442,41 +415,60 @@ function isRegular(){
             <div class="api-block">
                 <h3>API</h3>
                 <p>Доступные функции и объекты для разработки модулей</p>
-                <div class="api-elem dev">
+                <div class="type-modules">
+                    <div class="type-modul">
+                        <div class="ok"></div>
+                        <span>Проверенный модуль</span>
+                    </div>
+                    <div class="type-modul">
+                        <div class="norm"></div>
+                        <span>Нестабильный модуль</span>
+                    </div>
+                    <div class="type-modul">
+                        <div class="bad"></div>
+                        <span>Непроверенный модуль</span>
+                    </div>
+                </div>
+                <div class="api-elem dev ok">
                     <p>graph - глобальный объект, реализующий граф. graph.nodeHash - коллекция вершин графа.</p>
                 </div>
-                <div class="api-elem dev">
+                <div class="api-elem dev ok">
                     <p>getCountPath() - метод глобального объекта graph, возвращающий количество ребер</p>
                 </div>
-                <div class="api-elem dev">
+                <div class="api-elem dev ok">
                     <p>getCountNodes() - метод глобального объекта graph, возвращающий количество вершин</p>
                 </div>
-                <div class="api-elem dev">
+                <div class="api-elem dev ok">
                     <p>getConnectComponentCount() - метод глобального объекта graph, возвращающий число компонент связности</p>
                 </div>
-                <div class="api-elem dev">
+                <div class="api-elem dev ok">
                     <p>getCyclomaticNumber() - метод глобального объекта graph, возвращающий цикломатическое число</p>
                 </div>
-                <div class="api-elem dev">
+                <div class="api-elem dev ok">
                     <p>isCycle() - метод глобального объекта graph, возвращающий true при наличии циклов, иначе false</p>
                 </div>
-                <div class="api-elem dev">
+                <div class="api-elem dev ok">
                     <p>isTree() - метод глобального объекта graph, возвращающий true если граф является деревом, иначе false</p>
                 </div>
-                <div class="api-elem dev">
+                <div class="api-elem dev ok">
                     <p>isWood() - метод глобального объекта graph, возвращающий true если граф является лесом, иначе false</p>
                 </div>
-                <div class="api-elem dev">
+                <div class="api-elem dev ok">
                     <p>isDicotyledonous() - метод глобального объекта graph, возвращающий true если граф является двудольным, иначе false</p>
                 </div>
-                <div class="api-elem dev">
+                <div class="api-elem dev ok">
                     <p>isBiconnected() - метод глобального объекта graph, возвращающий true если граф является двусвязным, иначе false</p>
                 </div>
-                <div class="api-elem dev">
+                <div class="api-elem dev ok">
                     <p>isRegular() - метод глобального объекта graph, возвращающий true если граф является регулярным, иначе false</p>
                 </div>
             </div>
-
+            <div class="history-solution">
+                <span>История</span>
+                <p></p>
+                <p></p>
+                <p></p>
+            </div>
         </div>
 
     </div>

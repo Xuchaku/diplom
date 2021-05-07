@@ -6,12 +6,14 @@ let gl = 0;
 let globalConfig = {
     radius: 5
 };
+let historyText = "";
 let props = {
     leftClickMouse: null,
     rightClickMouse: null
 };
 let serverloader = null;
 let embedmodule = null;
+let isDemonstration = false;
 let isConstruct = true;
 let menuLeft;
 let graph;
@@ -21,9 +23,11 @@ let menuProperty;
 let history;
 let statistics;
 let historyAct;
+let matchingElemFunc = {};
 
 
-let colors = ["black", "blue", "red", "yellow", "purple", "white", "green", "orange"];
+let colorstoTask = [];
+let colorstoSolution = [];
 Object.defineProperty(String.prototype, 'hashCode', {
     value: function() {
         let hash = 0, i, chr;
@@ -46,6 +50,7 @@ class Task{
         this.actionMouse = JSON.parse(JSON.stringify(prps));
         this.hints = hints.slice();
         this.option = {};
+        this.colors = [];
         this.loadoption();
     }
     loadoption(){
@@ -57,12 +62,18 @@ class Task{
                         console.log(taskLst.children[i].children[1]);
                         let key = taskLst.children[i].children[1].id;
                         let value = taskLst.children[i].children[1].value;
+                        if(taskLst.children[i].children[1].type == "text")
+                            value = taskLst.children[i].children[1].value;
+                        else
+                            value = taskLst.children[i].children[1].checked;
                         this.option[key] = value;
                     }
                 }
             };break;
             case 2:break;
         }
+        for(let i = 0;i<colorstoTask.length;i++)
+            this.colors.push(colorstoTask[i]);
     }
 
 }
@@ -86,19 +97,19 @@ class EmbededModule{
             this.frmstatistic.append(option);
             this.frmstatistic.append(conf[i].name);
             let apiElem = document.createElement('div');
-            apiElem.className = "api-elem dev";
+            apiElem.className = `api-elem dev ${conf[i].verif}`;
             apiElem.innerHTML = `<p>${conf[i].name}() - ${conf[i].desc}. Возвращает тип ${conf[i].type}</p>`;
             this.apiBlock.append(apiElem);
             elemToParams.className = "val";
             switch (conf[i].type) {
                 case "boolean":elemToParams.innerHTML = `<label data-title="Числовой параметр" for="">${conf[i].name}</label>
-                        <input type="checkbox" class="value-for-task">
+                        <input type="checkbox" class="value-for-task" id="${conf[i].idHash}">
                         <div class="task-config">
                             <input type="checkbox">
                             <p href="#" class="tooltip">(?)<span><b>Действия</b><br>Включить данный параметр в задачу?</span></p>
                         </div>`;console.log("here");break;
                 case "integer":elemToParams.innerHTML = ` <label data-title="Числовой параметр" for="">${conf[i].name} (<i>число</i>)</label>
-                        <input type="text" class="value-for-task">
+                        <input type="text" class="value-for-task" id="${conf[i].idHash}">
                         <div class="task-config">
                             <input type="checkbox">
                             <p href="#" class="tooltip">(?)<span><b>Действия</b><br>Включить данный параметр в задачу?</span></p>
@@ -111,7 +122,11 @@ class EmbededModule{
     initfunc(modulesrc){
         console.log("HERE");
         for(let i =0;i<modulesrc.length;i++) {
-            this.funcStorage.push(eval(modulesrc[i].script));
+            let obj = {
+
+            }
+            obj[modulesrc[i].idHash] = eval(modulesrc[i].script);
+            this.funcStorage.push(obj);
         }
 
     }
@@ -123,7 +138,17 @@ class ServerConnector{
         this.urlsetmodules = "setmodule";
         this.urlgettask = "gettask";
         this.urlloadtask = "settask";
+        this.urlloadsolution = "loadsolution";
+        this.urlgetsolution = "getsolution";
         this.modul = [];
+    }
+    async getRandomSolution(){
+        let fetchResponse = await fetch(this.host + this.urlgetsolution, {
+            method: 'GET',
+        });
+        let txt = await fetchResponse.text();
+        let data = JSON.parse(txt);
+        return data;
     }
     async gettask(){
         let fetchResponse = await fetch(this.host + this.urlgettask, {
@@ -141,8 +166,13 @@ class ServerConnector{
         });
         await fetchResponse.text();
     }
-    async loadsolution(){
-
+    async loadsolution(data){
+        let fetchResponse = await fetch(this.host + this.urlloadsolution, {
+            method: 'POST',
+            body: JSON.stringify(data)
+        });
+        let txt = await fetchResponse.text();
+        return txt;
     }
     async getmodules(){
         let fetchResponse = await fetch(this.host + this.urlgetmodules, {
@@ -158,11 +188,81 @@ class ServerConnector{
         //fun();
     }
     async loadmodule(data){
+        console.log(data);
         let fetchResponse = await fetch(this.host + this.urlsetmodules, {
             method: 'POST',
-            body: new FormData(data)
+            body: data
+            //body: new FormData(data)
         });
         await fetchResponse.text();
+    }
+}
+function multiEdit(x, y, arrToAdd){
+    let isFree = true;
+    let node = null;
+    for (let key in graph.nodeHash) {
+        if (Math.abs(graph.nodeHash[key].x - x) <= graph.nodeHash[key].radius &&
+            Math.abs(graph.nodeHash[key].y - y) <= graph.nodeHash[key].radius) {
+            isFree = false;
+            node = graph.nodeHash[key];
+        }
+    }
+    if(arrToAdd.length < 1 && isFree) {
+        graph.add(x, y);
+        arrToAdd.push({x,y, key: graph.getKey(x,y)});
+        menuProperty.update("add");
+    }
+    else if(arrToAdd.length < 1 && !isFree){
+        arrToAdd.push({x:node.x,y:node.y, key: graph.getKey(node.x,node.y)});
+    }
+    else{
+        let key1 = arrToAdd[arrToAdd.length - 1].key;
+        if(isFree){
+            graph.add(x, y);
+            arrToAdd.push({x,y, key: graph.getKey(x,y)});
+            graph.addPath(key1, graph.getKey(x,y));
+            menuProperty.update("addPath");
+            menuProperty.update("add");
+        }
+        else{
+            /*if(graph.getKey(node.x,node.y) != arrToAdd[arrToAdd.length - 2].key){
+                if(key1 != graph.getKey(node.x,node.y)){
+                    arrToAdd.push({x:node.x,y:node.y, key: graph.getKey(node.x,node.y)});
+                    graph.addPath(key1, graph.getKey(node.x,node.y));
+                    menuProperty.update("addPath");
+                    for(let i = 0;i<arrToAdd.length-1;i++){
+                        graph.nodeHash[arrToAdd[i].key].phantomX = null;
+                        graph.nodeHash[arrToAdd[i].key].phantomY = null;
+                    }
+                    console.log("++++++++++");
+                }
+                else{
+                    console.log("*****");
+                    clearData();
+                }
+               // clearData();
+            }*/
+            //graph.getKey(node.x,node.y)
+            //arrToAdd[arrToAdd.length - 1].key
+            let flag = false;
+            for(let i = 0;i<graph.nodeHash[key1].roads.length;i++){
+                if(graph.nodeHash[key1].roads[i].to == graph.getKey(node.x,node.y)){
+                    flag = true;
+                }
+            }
+            if(key1 != graph.getKey(node.x,node.y) && !flag){
+                arrToAdd.push({x:node.x,y:node.y, key: graph.getKey(node.x,node.y)});
+                graph.addPath(key1, graph.getKey(node.x,node.y));
+                menuProperty.update("addPath");
+                for(let i = 0;i<arrToAdd.length-1;i++){
+                    graph.nodeHash[arrToAdd[i].key].phantomX = null;
+                    graph.nodeHash[arrToAdd[i].key].phantomY = null;
+                }
+            }
+            else{
+                return true;
+            }
+        }
     }
 }
 function changeColorCanvas(x,y){
@@ -177,7 +277,7 @@ function changeColorCanvas(x,y){
         if(Math.abs(graph.nodeHash[key].x -x) <= graph.nodeHash[key].radius &&
             Math.abs(graph.nodeHash[key].y -y) <= graph.nodeHash[key].radius){
             if(!menu.blocked) {
-                graph.nodeHash[key].setColor(colors[gl % colors.length]);
+                graph.nodeHash[key].setColor(colorstoSolution[gl % colorstoSolution.length]);
                 return;
             }
         }
@@ -190,7 +290,7 @@ function changeColorCanvas(x,y){
                 (((x > graph.nodeHash[key].roads[i].xStart && x < graph.nodeHash[key].roads[i].xEnd) || (x > graph.nodeHash[key].roads[i].xEnd && x < graph.nodeHash[key].roads[i].xStart)) &&
                     (y > graph.nodeHash[key].roads[i].yStart && y < graph.nodeHash[key].roads[i].yEnd && !menu.blocked)
                 )){
-                setPropertyPath(graph.nodeHash[key].roads[i].to, graph.nodeHash[key].roads[i].in, colors[gl % colors.length], graph.nodeHash[key].roads[i].setColor);
+                setPropertyPath(graph.nodeHash[key].roads[i].to, graph.nodeHash[key].roads[i].in, colorstoSolution[gl % colorstoSolution.length], graph.nodeHash[key].roads[i].setColor);
             }
         }
     }
@@ -281,39 +381,41 @@ class HistoryAction{
         this.counter = 1;
     }
     setMessage(message){
-        let node = document.createElement("div");
+        historyText += message + "\n";
+        /*let node = document.createElement("div");
         node.className = "history-elem";
         let p = document.createElement("p");
         p.innerText = message;
         node.append(p);
-        this.rootElem.append(node);
+        this.rootElem.append(node);*/
     }
     update(action, param = null, obj = null){
-        if(!param && !obj){
+        if(isConstruct) return;
+        if(param == null){
             switch (action) {
-                case "addNode":this.setMessage(`${this.counter}.Добавлена новая вершина`);break;
-                case "deleteNode":this.setMessage(`${this.counter}.Удалена вершина`);break;
-                case "addPath":this.setMessage(`${this.counter}.Построено ребро`);break;
-                case "deletePath":this.setMessage(`${this.counter}.Удалено ребро`);break;
+                case "addNode":this.setMessage(`${this.counter}.Добавлена новая вершина #${obj.hashCode}`);break;
+                case "deleteNode":this.setMessage(`${this.counter}.Удалена вершина #${obj.hashCode}`);break;
+                case "addPath":this.setMessage(`${this.counter}.Построено ребро #${obj.hashCode}`);break;
+                case "deletePath":this.setMessage(`${this.counter}.Удалено ребро #${obj.hashCode}`);break;
             }
         }
         else{
             if(obj instanceof Node){
                 switch (action) {
-                    case "setColor":this.setMessage(`${this.counter}.Установлен цвет ${param} для вершины`);break;
-                    case "setName":this.setMessage(`${this.counter}.Установлено имя ${param} для вершины`);break;
-                    case "setGrow":this.setMessage(`${this.counter}.Установлен размер для вершины в ${param} единиц`);break;
-                    case "setActive":this.setMessage(param ? `${this.counter}.Установлено выделение на вершине` : `${this.counter}.Снято выделение с вершины"`);break;
-                    case "setWeight":this.setMessage(`${this.counter}.Установлен вес ${param} для вершины`);break;
+                    case "setColor":this.setMessage(`${this.counter}.Установлен цвет ${param} для вершины #${obj.hashCode}`);break;
+                    case "setName":this.setMessage(`${this.counter}.Установлено имя ${param} для вершины #${obj.hashCode}`);break;
+                    case "setGrow":this.setMessage(`${this.counter}.Установлен размер для вершины в ${param} единиц #${obj.hashCode}`);break;
+                    case "setActive":this.setMessage(param ? `${this.counter}.Установлено выделение на вершине #${obj.hashCode}` : `${this.counter}.Снято выделение с вершины #${obj.hashCode}`);break;
+                    case "setWeight":this.setMessage(`${this.counter}.Установлен вес ${param} для вершины #${obj.hashCode}`);break;
                 }
             }
             if(obj instanceof Path){
                 switch (action) {
-                    case "setColor":this.setMessage(`${this.counter}.Установлен цвет ${param} для ребра`);break;
-                    case "setName":this.setMessage(`${this.counter}.Установлено имя ${param} для ребра`);break;
-                    case "setGrow":this.setMessage(`${this.counter}.Установлена толщина для ребра в ${param} единиц`);break;
-                    case "setActive":this.setMessage(param ? `${this.counter}.Поставлено выделение для ребра` : `${this.counter}.Снято выделение с ребра`);break;
-                    case "setWeight":this.setMessage(`${this.counter}.Установлен вес ${param} для ребра`);break;
+                    case "setColor":this.setMessage(`${this.counter}.Установлен цвет ${param} для ребра #${obj.hashCode}`);break;
+                    case "setName":this.setMessage(`${this.counter}.Установлено имя ${param} для ребра #${obj.hashCode}`);break;
+                    case "setGrow":this.setMessage(`${this.counter}.Установлена толщина для ребра #${obj.hashCode} в ${param} единиц`);break;
+                    case "setActive":this.setMessage(param ? `${this.counter}.Поставлено выделение для ребра #${obj.hashCode}` : `${this.counter}.Снято выделение с ребра #${obj.hashCode}`);break;
+                    case "setWeight":this.setMessage(`${this.counter}.Установлен вес ${param} для ребра #${obj.hashCode}`);break;
                 }
             }
         }
@@ -327,6 +429,28 @@ class History{
         this.state = [];
         this.index = 1;
         this.init();
+    }
+    setLastState(){
+        if(this.state.length > 1) {
+            graph.nodeHash = JSON.parse(this.state[this.index]);
+            for (let key in graph.nodeHash) {
+                let roads = [];
+                for (let i = 0; i < graph.nodeHash[key].roads.length; i++) {
+                    roads.push(graph.nodeHash[key].roads[i]);
+                }
+                //roads = JSON.stringify(roads);
+                graph.nodeHash[key] = new Node(graph.nodeHash[key].name, graph.nodeHash[key].x, graph.nodeHash[key].y, graph.nodeHash[key].hashCode, graph.nodeHash[key].radius, graph.nodeHash[key].color, graph.nodeHash[key].weight, graph.nodeHash[key].isActive);
+                for (let i = 0; i < roads.length; i++) {
+                    graph.nodeHash[key].roads.push(new Path(roads[i].name, roads[i].in, roads[i].to, roads[i].hashCode, roads[i].xStart, roads[i].yStart, roads[i].xEnd, roads[i].yEnd, roads[i].width, roads[i].stylePath, roads[i].weight, roads[i].color, false, roads[i].isActive));
+                }
+                //graph.nodeHash[key].roads = JSON.parse(roads);
+                roads = [];
+            }
+        }
+        else{
+            graph.nodeHash = {};
+        }
+
     }
     init(){
         this.backElem.addEventListener("click", ()=>{
@@ -371,6 +495,7 @@ class History{
     }
     clear(){
         this.state = [];
+
         this.backElem.disabled = true;
         this.nextElem.disabled = true;
         this.state.push(JSON.stringify({}));
@@ -384,20 +509,26 @@ class History{
                 roads.push(graph.nodeHash[key].roads[i]);
             }
             //roads = JSON.stringify(roads);
-            graph.nodeHash[key] = new Node(graph.nodeHash[key].name,graph.nodeHash[key].x,graph.nodeHash[key].y, graph.nodeHash[key].radius ,graph.nodeHash[key].color, graph.nodeHash[key].weight,graph.nodeHash[key].isActive);
+            graph.nodeHash[key] = new Node(graph.nodeHash[key].name,graph.nodeHash[key].x,graph.nodeHash[key].y,graph.nodeHash[key].hashCode ,graph.nodeHash[key].radius ,graph.nodeHash[key].color, graph.nodeHash[key].weight,graph.nodeHash[key].isActive);
             for(let i =0;i< roads.length;i++){
-                graph.nodeHash[key].roads.push(new Path(roads[i].name, roads[i].in, roads[i].to, roads[i].xStart, roads[i].yStart, roads[i].xEnd, roads[i].yEnd, roads[i].width, roads[i].stylePath ,roads[i].weight ,roads[i].color,false, roads[i].isActive));
+                graph.nodeHash[key].roads.push(new Path(roads[i].name, roads[i].in, roads[i].to,roads[i].hashCode, roads[i].xStart, roads[i].yStart, roads[i].xEnd, roads[i].yEnd, roads[i].width, roads[i].stylePath ,roads[i].weight ,roads[i].color,false, roads[i].isActive));
             }
             //graph.nodeHash[key].roads = JSON.parse(roads);
             roads = [];
         }
         menuProperty.update("ALL");
         if(this.index == 0){
-            this.state = [];
-            this.state.push(JSON.stringify({}));
-            this.backElem.disabled = true;
-            this.nextElem.disabled = true;
+            if(!isDemonstration){
+                this.state = [];
+                this.state.push(JSON.stringify({}));
+                this.backElem.disabled = true;
+                this.nextElem.disabled = true;
+            }
+            else{
+                this.backElem.disabled = true;
+            }
         }
+
     }
     next(){
         if(!(this.index + 1 > this.state.length  - 1)){
@@ -408,16 +539,19 @@ class History{
                     roads.push(graph.nodeHash[key].roads[i]);
                 }
                 //roads = JSON.stringify(roads);
-                graph.nodeHash[key] = new Node(graph.nodeHash[key].name,graph.nodeHash[key].x,graph.nodeHash[key].y, graph.nodeHash[key].radius , graph.nodeHash[key].color, graph.nodeHash[key].weight, graph.nodeHash[key].isActive);
+                graph.nodeHash[key] = new Node(graph.nodeHash[key].name,graph.nodeHash[key].x,graph.nodeHash[key].y, graph.nodeHash[key].hashCode ,graph.nodeHash[key].radius , graph.nodeHash[key].color, graph.nodeHash[key].weight, graph.nodeHash[key].isActive);
                 //graph.nodeHash[key].roads = JSON.parse(roads);
                 for(let i =0;i< roads.length;i++){
-                    graph.nodeHash[key].roads.push(new Path(roads[i].name, roads[i].in, roads[i].to, roads[i].xStart, roads[i].yStart, roads[i].xEnd, roads[i].yEnd, roads[i].width,roads[i].stylePath ,roads[i].weight,roads[i].color,false, roads[i].isActive));
+                    graph.nodeHash[key].roads.push(new Path(roads[i].name, roads[i].in, roads[i].to,roads[i].hashCode ,roads[i].xStart, roads[i].yStart, roads[i].xEnd, roads[i].yEnd, roads[i].width,roads[i].stylePath ,roads[i].weight,roads[i].color,false, roads[i].isActive));
                 }
                 roads = [];
             }
             menuProperty.update("ALL");
             if(this.index == this.state.length - 1){
                 this.nextElem.disabled = true;
+            }
+            if(this.index > 0){
+                this.backElem.disabled = false;
             }
         }
     }
@@ -427,6 +561,11 @@ class Statistics{
         this.statisticElem = document.querySelector(".statistic");
         this.prps = [];
         this.toggle();
+    }
+    clear(){
+        for(let i =0;i<this.statisticElem.children.length;i++){
+            this.statisticElem.children[i].children[0].innerText = "";
+        }
     }
     toggle(){
         this.statisticElem.style.display = isConstruct ? "none" : "flex";
@@ -448,7 +587,9 @@ class Statistics{
 
         let j = 0;
         for(let i = 10;i< this.statisticElem.children.length;i++){
-            this.statisticElem.children[i].children[0].innerText = embedmodule.funcStorage[j]();
+            for(let key in embedmodule.funcStorage[j]){
+                this.statisticElem.children[i].children[0].innerText = embedmodule.funcStorage[j][key]();
+            }
             j++;
         }
     }
@@ -477,11 +618,45 @@ class MenuPropertyGraph{
       this.formStatistic = document.querySelector("#frm-statistic");
       this.elemNewTaskText = document.querySelector("#text-newtask");
       this.areaTextElem =  document.querySelector("#text-area");
+
+      this.taskLstWrapper = document.querySelector(".task-lst");
+      this.allChgangeElems = [];
       this.init();
     }
     init(){
         let selectLeft = null;
         let selectRight = null;
+
+        let errorTaskBuildBlock = document.querySelector(".error-task-build");
+        for(let i = 0;i<this.taskLstWrapper.children.length;i++){
+            this.taskLstWrapper.children[i].children[2].children[0].addEventListener("change",()=>{
+                this.updateText();
+            });
+        }
+
+        matchingElemFunc = {
+            "nodes":graph.getCountNodes,
+            "paths":graph.getCountPath,
+            "connect-component":graph.getConnectComponentCount,
+            "cyclomatic-number":graph.getCyclomaticNumber,
+            "dicotyledonous":graph.isDicotyledonous,
+            "checkRegular":graph.isRegular,
+            "checkTree": graph.isTree,
+            "checkCycle":graph.isCycle,
+            "checkWood":graph.isWood,
+            "checkConnected":graph.isBiconnected
+        };
+       let wrapper = document.querySelector(".task-lst");
+        let len = wrapper.children.length;
+        let j = 0;
+        for(let i = len - embedmodule.funcStorage.length;i< wrapper.children.length;i++){
+            for(let key in embedmodule.funcStorage[j]){
+                matchingElemFunc[key] = embedmodule.funcStorage[j][key];
+            }
+            j++;
+        }
+
+
         this.lkmElem.addEventListener("change", ()=>{
             selectLeft = this.lkmElem.value;
         });
@@ -497,20 +672,27 @@ class MenuPropertyGraph{
             }
         });
         this.createTaskElem.addEventListener("click", ()=>{
-            if(selectLeft == selectRight)
-                console.log("ERROR");
+            if(selectLeft == selectRight){
+                errorTaskBuildBlock.innerText = "";
+                if(selectLeft == null || selectRight == null || selectLeft == "Действие" || selectRight == "Действие")
+                    errorTaskBuildBlock.innerText += "*Не назначены действия для пользовтеля \n";
+                else{
+                    errorTaskBuildBlock.innerText += "*Назначенные действия не могут совпадать \n";
+                }
+            }
+
             else{
                 //isConstruct = false;
                 let prps = [];
                 for(let i =0;i<this.formStatistic.children.length;i++){
                     prps.push(this.formStatistic.children[i].checked);
                 }
-                console.log(prps);
+
                 //menuLeft.hidden();
                 historyAct.clear();
                 //statistics.setParam(prps);
                 ///statistics.toggle();
-
+                console.log(prps);
                 //false = tip1
                 //true = tip2
                 if(this.paElem.checked){
@@ -539,23 +721,23 @@ class MenuPropertyGraph{
     }
     updateText(){
         this.elemNewTaskText.innerHTML = "<p>Постройте граф удовлетворяющий следующим свойствам:</p>";
-        this.elemNewTaskText.innerHTML += "<p>Количество вершин: " + this.nodesElemCount.value + "</p>";
-        this.elemNewTaskText.innerHTML += "<p>Количество ребер: " + this.pathElemCount.value + "</p>";
-        this.elemNewTaskText.innerHTML += "<p>Количество компонент связоности: " + this.connectElemCount.value + "</p>";
-        this.elemNewTaskText.innerHTML += "<p>Цикломатическое число: " + this.cyclomaticElemCount.value + "</p>";
-        this.elemNewTaskText.innerHTML += this.checkedElemCycle.checked ? "<p>Имеются циклы</p>" : "<p>Без циклов</p>";
-        this.elemNewTaskText.innerHTML += this.checkedElemTree.checked ? "<p>Дерево</p>" : "";
-        this.elemNewTaskText.innerHTML += this.checkWoodElem.checked ? "<p>Лес</p>" : "";
-        this.elemNewTaskText.innerHTML += this.checkDicotyledonousElem.checked ? "<p>Двудольный</p>" : "";
-        this.elemNewTaskText.innerHTML += this.biconnectElem.checked ? "<p>Двусвязный</p>" : "";
-        this.elemNewTaskText.innerHTML += this.checkedRegularElem.checked ? "<p>Регулярный</p>" : "";
+        this.elemNewTaskText.innerHTML += this.nodesElemCount.nextElementSibling.children[0].checked ? ("<p>Количество вершин: " + this.nodesElemCount.value + "</p>") : "";
+        this.elemNewTaskText.innerHTML += this.pathElemCount.nextElementSibling.children[0].checked ? ("<p>Количество ребер: " + this.pathElemCount.value + "</p>") : "";
+        this.elemNewTaskText.innerHTML += this.connectElemCount.nextElementSibling.children[0].checked ? ("<p>Количество компонент связоности: " + this.connectElemCount.value + "</p>") : "";
+        this.elemNewTaskText.innerHTML += this.cyclomaticElemCount.nextElementSibling.children[0].checked ? ("<p>Цикломатическое число: " + this.cyclomaticElemCount.value + "</p>") : "";
+        this.elemNewTaskText.innerHTML += this.checkedElemCycle.nextElementSibling.children[0].checked ? (this.checkedElemCycle.checked ? "<p>Имеются циклы</p>" : "") : "";
+        this.elemNewTaskText.innerHTML += this.checkedElemTree.nextElementSibling.children[0].checked ? (this.checkedElemTree.checked ? "<p>Дерево</p>" : "") : "";
+        this.elemNewTaskText.innerHTML += this.checkWoodElem.nextElementSibling.children[0].checked ? (this.checkWoodElem.checked ? "<p>Лес</p>" : "") : "";
+        this.elemNewTaskText.innerHTML += this.checkDicotyledonousElem.nextElementSibling.children[0].checked ? (this.checkDicotyledonousElem.checked ? "<p>Двудольный</p>" : "") : "";
+        this.elemNewTaskText.innerHTML += this.biconnectElem.nextElementSibling.children[0].checked ? (this.biconnectElem.checked ? "<p>Двусвязный</p>" : "") : "";
+        this.elemNewTaskText.innerHTML += this.checkedRegularElem.nextElementSibling.children[0].checked ? (this.checkedRegularElem.checked ? "<p>Регулярный</p>" : "") : "";
 
         let wrapper = document.querySelector(".task-lst");
         let j = 0;
         let len = wrapper.children.length;
         for(let i = len - embedmodule.funcStorage.length;i< wrapper.children.length;i++){
             console.log(wrapper.children[i].children[1].checked);
-            this.elemNewTaskText.innerHTML += wrapper.children[i].children[1].checked ? `<p>${serverloader.modul[j].name}</p>` : "";
+            this.elemNewTaskText.innerHTML += wrapper.children[i].children[1].nextElementSibling.children[0].checked ? (wrapper.children[i].children[1].checked ? `<p>${serverloader.modul[j].name}</p>` : "") : "";
             j++;
         }
     }
@@ -582,8 +764,15 @@ class MenuPropertyGraph{
         let wrapper = document.querySelector(".task-lst");
         let j = 0;
         let len = wrapper.children.length;
+        console.log(embedmodule.funcStorage);
         for(let i = len - embedmodule.funcStorage.length;i< wrapper.children.length;i++){
-            wrapper.children[i].children[1].checked = embedmodule.funcStorage[j]();
+            for(let key in embedmodule.funcStorage[j]){
+                if(wrapper.children[i].children[1].type == "checkbox")
+                    wrapper.children[i].children[1].checked = embedmodule.funcStorage[j][key]();
+                else
+                    wrapper.children[i].children[1].value = embedmodule.funcStorage[j][key]();
+            }
+
             j++;
         }
         statistics.update(this);
@@ -601,22 +790,63 @@ class ContextMenu{
 
         this.setname = document.querySelector("#setname");
         this.elemsColor = [];
-        this.initColor();
+        //this.initColor();
 
         this.setcolor = document.querySelector(".form_radio_group");
+        this.addColorElem =  document.querySelector("#add-color");
+        this.removeColorElem = document.querySelector("#remove-color");
         this.init();
     }
     initColor(){
-        let elems = document.querySelectorAll(".form_radio_group-item");
+      /*  let elems = document.querySelectorAll(".form_radio_group-item");
         for(let i=0;i<elems.length;i++){
             elems[i].children[1].style.backgroundColor = colors[i];
             this.elemsColor.push(elems[i].children[0]);
+
+        }*/
+    }
+    clearColors(){
+        let colorsElem = document.querySelector(".form_radio_group");
+        while (colorsElem.children.length > 2) {
+            colorsElem.removeChild(colorsElem.lastElementChild);
         }
     }
     init(){
-
-        for(let i =0;i<this.elemsColor.length;i++){
+        let cnt = 0;
+        this.addColorElem.addEventListener("click", ()=>{
+            let newElem = document.createElement("div");
+            newElem.className = "form_radio_group-item";
+            newElem.innerHTML = `<input id="radio-${cnt}" type="radio" name="radio" value="2">
+                    <label for="radio-${cnt}"></label>`;
+            cnt++;
+            let colorHEX= "#" + Number(Math.floor(Math.random()*65536)).toString(16);
+            colorstoTask.push(colorHEX);
+            newElem.children[0].addEventListener("change", ()=>{
+                console.log("BAM");
+                this.blocked = false;
+                this.setcolor.style.display = "none";
+                this.targetPoint.isSelected = false;
+                if(this.targetPoint instanceof Path){
+                    setPropertyPath(this.targetPoint.to, this.targetPoint.in, colorHEX, this.targetPoint.setColor);
+                }
+                else {
+                    this.targetPoint.setColor(colorHEX);
+                }
+                //this.targetPoint.setColor(colors[i]);
+                // this.targetPoint.color = colors[i];
+            });
+            newElem.children[1].style.backgroundColor = colorHEX;
+            this.setcolor.append(newElem);
+        });
+        this.removeColorElem.addEventListener("click", ()=>{
+            if(this.setcolor.children.length > 2){
+                colorstoTask.pop();
+                this.setcolor.removeChild(this.setcolor.lastElementChild);
+            }
+        });
+        /*for(let i =0;i<this.elemsColor.length;i++){
             this.elemsColor[i].addEventListener("change", ()=>{
+                console.log(this.elemsColor[i]);
                 this.blocked = false;
                 this.setcolor.style.display = "none";
                 this.targetPoint.isSelected = false;
@@ -629,7 +859,7 @@ class ContextMenu{
                 //this.targetPoint.setColor(colors[i]);
                // this.targetPoint.color = colors[i];
             })
-        }
+        }*/
         //поле ввода имени и значения
         this.setname.addEventListener("keydown", (e)=>{
             if(e.code == "Enter"){
@@ -788,7 +1018,10 @@ class Menu{
         this.init();
     }
     toggle(){
-        this.mainElem.style.display = isConstruct ? "flex" : "none";
+        for(let i = 0;i<this.mainElem.children.length -3;i++){
+            this.mainElem.children[i].style.display = isConstruct ? "flex" : "none";
+        }
+        //this.mainElem.style.display = isConstruct ? "flex" : "none";
     }
     init(){
 
@@ -932,6 +1165,7 @@ class CNV {
         });
 
         this.cnv.addEventListener("mousedown", (e) => {
+            if(isDemonstration) return;
             let x = e.clientX - this.otn.x;
             let y = e.clientY - this.otn.y;
             if(isConstruct){
@@ -988,12 +1222,42 @@ class CNV {
                                 menuProperty.update("add");
                             }
                             else{
-                                arrToAdd.push({x:node.x,y:node.y, key: graph.getKey(node.x,node.y)});
-                                graph.addPath(key1, graph.getKey(node.x,node.y));
-                                menuProperty.update("addPath");
-                                for(let i = 0;i<arrToAdd.length-1;i++){
-                                    graph.nodeHash[arrToAdd[i].key].phantomX = null;
-                                    graph.nodeHash[arrToAdd[i].key].phantomY = null;
+                                /*if(graph.getKey(node.x,node.y) != arrToAdd[arrToAdd.length - 2].key){
+                                    if(key1 != graph.getKey(node.x,node.y)){
+                                        arrToAdd.push({x:node.x,y:node.y, key: graph.getKey(node.x,node.y)});
+                                        graph.addPath(key1, graph.getKey(node.x,node.y));
+                                        menuProperty.update("addPath");
+                                        for(let i = 0;i<arrToAdd.length-1;i++){
+                                            graph.nodeHash[arrToAdd[i].key].phantomX = null;
+                                            graph.nodeHash[arrToAdd[i].key].phantomY = null;
+                                        }
+                                        console.log("++++++++++");
+                                    }
+                                    else{
+                                        console.log("*****");
+                                        clearData();
+                                    }
+                                   // clearData();
+                                }*/
+                                //graph.getKey(node.x,node.y)
+                                //arrToAdd[arrToAdd.length - 1].key
+                                let flag = false;
+                                for(let i = 0;i<graph.nodeHash[key1].roads.length;i++){
+                                    if(graph.nodeHash[key1].roads[i].to == graph.getKey(node.x,node.y)){
+                                        flag = true;
+                                    }
+                                }
+                                if(key1 != graph.getKey(node.x,node.y) && !flag){
+                                    arrToAdd.push({x:node.x,y:node.y, key: graph.getKey(node.x,node.y)});
+                                    graph.addPath(key1, graph.getKey(node.x,node.y));
+                                    menuProperty.update("addPath");
+                                    for(let i = 0;i<arrToAdd.length-1;i++){
+                                        graph.nodeHash[arrToAdd[i].key].phantomX = null;
+                                        graph.nodeHash[arrToAdd[i].key].phantomY = null;
+                                    }
+                                }
+                                else{
+                                    clearData();
                                 }
                             }
 
@@ -1001,12 +1265,31 @@ class CNV {
                     }
                     //построение ребра
                     if(menuLeft.mode == 4 && !menu.blocked){
+                        let flag = false;
                         for (let key in graph.nodeHash) {
                             if (Math.abs(graph.nodeHash[key].x - x) <= graph.nodeHash[key].radius &&
                                 Math.abs(graph.nodeHash[key].y - y) <= graph.nodeHash[key].radius) {
-                                if(arrToPath.length < 2 && !arrToPath.includes(key)){
-                                    graph.nodeHash[key].isSelected = true;
-                                    arrToPath.push(key);
+                                if(arrToPath.length < 2){
+                                    if(arrToPath.includes(key)){
+                                        flag = true;
+                                    }
+                                    if(arrToPath.length > 0){
+                                        for(let i = 0;i<graph.nodeHash[arrToPath[0]].roads.length;i++){
+                                            if(graph.nodeHash[arrToPath[0]].roads[i].to == key){
+                                                flag = true;
+                                            }
+                                        }
+                                    }
+                                    if(!flag){
+                                        graph.nodeHash[key].isSelected = true;
+                                        arrToPath.push(key);
+                                    }
+                                    else{
+                                        graph.nodeHash[arrToPath[0]].isSelected = false;
+                                        graph.nodeHash[arrToPath[0]].phantomX = null;
+                                        graph.nodeHash[arrToPath[0]].phantomY = null;
+                                        arrToPath = [];
+                                    }
                                 }
                             }
                         }
@@ -1085,6 +1368,77 @@ class CNV {
                 console.log(props.leftClickMouse, props.rightClickMouse);
                 if(e.which == 1){
                     if(props.leftClickMouse == "construct"){
+                        let val = multiEdit(x, y, arrToAdd);
+                        if(val){
+                            clearData();
+                        }
+                        /*let isFree = true;
+                        let node = null;
+                        for (let key in graph.nodeHash) {
+                            if (Math.abs(graph.nodeHash[key].x - x) <= graph.nodeHash[key].radius &&
+                                Math.abs(graph.nodeHash[key].y - y) <= graph.nodeHash[key].radius) {
+                                isFree = false;
+                                node = graph.nodeHash[key];
+                            }
+                        }
+                        if(arrToAdd.length < 1 && isFree) {
+                            graph.add(x, y);
+                            arrToAdd.push({x,y, key: graph.getKey(x,y)});
+                            menuProperty.update("add");
+                        }
+                        else if(arrToAdd.length < 1 && !isFree){
+                            arrToAdd.push({x:node.x,y:node.y, key: graph.getKey(node.x,node.y)});
+                        }
+                        else{
+                            let key1 = arrToAdd[arrToAdd.length - 1].key;
+                            if(isFree){
+                                graph.add(x, y);
+                                arrToAdd.push({x,y, key: graph.getKey(x,y)});
+                                graph.addPath(key1, graph.getKey(x,y));
+                                menuProperty.update("addPath");
+                                menuProperty.update("add");
+                            }
+                            else{
+                                if(graph.getKey(node.x,node.y) != arrToAdd[arrToAdd.length - 2].key){
+                                    if(key1 != graph.getKey(node.x,node.y)){
+                                        arrToAdd.push({x:node.x,y:node.y, key: graph.getKey(node.x,node.y)});
+                                        graph.addPath(key1, graph.getKey(node.x,node.y));
+                                        menuProperty.update("addPath");
+                                        for(let i = 0;i<arrToAdd.length-1;i++){
+                                            graph.nodeHash[arrToAdd[i].key].phantomX = null;
+                                            graph.nodeHash[arrToAdd[i].key].phantomY = null;
+                                        }
+                                        console.log("++++++++++");
+                                    }
+                                    else{
+                                        console.log("*****");
+                                        clearData();
+                                    }
+                                   // clearData();
+                                }
+                                //graph.getKey(node.x,node.y)
+                                //arrToAdd[arrToAdd.length - 1].key
+                                let flag = false;
+                                for(let i = 0;i<graph.nodeHash[key1].roads.length;i++){
+                                    if(graph.nodeHash[key1].roads[i].to == graph.getKey(node.x,node.y)){
+                                        flag = true;
+                                    }
+                                }
+                                if(key1 != graph.getKey(node.x,node.y) && !flag){
+                                    arrToAdd.push({x:node.x,y:node.y, key: graph.getKey(node.x,node.y)});
+                                    graph.addPath(key1, graph.getKey(node.x,node.y));
+                                    menuProperty.update("addPath");
+                                    for(let i = 0;i<arrToAdd.length-1;i++){
+                                        graph.nodeHash[arrToAdd[i].key].phantomX = null;
+                                        graph.nodeHash[arrToAdd[i].key].phantomY = null;
+                                    }
+                                }
+                                else{
+                                    clearData();
+                                }
+                            }
+                        }*/
+                        /*
                         //addToCanvas(x,y,arrToPath);
                         let flag = false;
                         //проверка на нажатие
@@ -1120,6 +1474,8 @@ class CNV {
                             graph.add(x, y);
                             statistics.update();
                         }
+                        */
+
                     }
                     if(props.leftClickMouse == "delete"){
                         deleteToCanvas(x,y);
@@ -1268,12 +1624,22 @@ class CNV {
                     hovered.call(this,"no-drop",x,y);
                 }
             }
+            else{
+                if(props.leftClickMouse == "construct"){
+                    if(arrToAdd.length > 0){
+                        graph.nodeHash[arrToAdd[arrToAdd.length - 1].key].phantomX = x;
+                        graph.nodeHash[arrToAdd[arrToAdd.length - 1].key].phantomY = y;
+                    }
+                }
+            }
 
         });
 
 
     }
 }
+
+
 class Graph{
     //добавить методы удаления, добавления путей
     constructor(){
@@ -1281,11 +1647,17 @@ class Graph{
         this.cnt = 0;
         this.isCycled = false;
         this.isDicotyleds = false;
+        this.allActive = true;
+
+
+
     }
     add(x,y,name =""){
-        this.nodeHash[this.cnt++] = new Node(name, x, y);
+        let hash = this.cnt.toString().hashCode();
+        this.nodeHash[this.cnt] = new Node(name, x, y, hash);
         history.update(this.nodeHash);
-        historyAct.update("addNode");
+        historyAct.update("addNode", null, this.nodeHash[this.cnt]);
+        this.cnt++;
     }
     getCountPath(){
         let path = [];
@@ -1335,6 +1707,11 @@ class Graph{
         }
         for(let key in this.nodeHash)
             this.nodeHash[key]._color = null;
+        if(this.getConnectComponentCount() != 1){
+            console.log("FF");
+            return false;
+        }
+
         return this.isDicotyleds;
     }
     dfs3(node, color, checkendNode){
@@ -1444,11 +1821,11 @@ class Graph{
             }
         }
     }
-
     deleteNode(node){
         let keyDelete = null;
         for(let key in this.nodeHash){
             if(node == this.nodeHash[key]){
+                historyAct.update("deleteNode", null, this.nodeHash[key]);
                 keyDelete = key;
                 delete this.nodeHash[key];
             }
@@ -1462,17 +1839,21 @@ class Graph{
             }
         }
         history.update(this.nodeHash);
-        historyAct.update("deleteNode");
+
     }
     addPath(key, key2){
-        graph.nodeHash[key].roads.push(new Path("",key, key2,  graph.nodeHash[key].x,  graph.nodeHash[key].y, graph.nodeHash[key2].x,  graph.nodeHash[key2].y, 1, globalConfig.stylePath, null));
-        graph.nodeHash[key2].roads.push(new Path("",key2, key, graph.nodeHash[key2].x,  graph.nodeHash[key2].y, graph.nodeHash[key].x,  graph.nodeHash[key].y, 1, globalConfig.stylePath, null));
+        let hash = (key + key2).toString().hashCode();
+        let path1 = new Path("",key, key2, hash,  graph.nodeHash[key].x,  graph.nodeHash[key].y, graph.nodeHash[key2].x,  graph.nodeHash[key2].y, 1, globalConfig.stylePath, null);
+        let path2 = new Path("",key2, key, hash, graph.nodeHash[key2].x,  graph.nodeHash[key2].y, graph.nodeHash[key].x,  graph.nodeHash[key].y, 1, globalConfig.stylePath, null);
+        graph.nodeHash[key].roads.push(path1);
+        graph.nodeHash[key2].roads.push(path2);
         history.update(this.nodeHash);
-        historyAct.update("addPath");
+        historyAct.update("addPath", null, path1);
     }
     deletePath(key, key2){
         for(let i = 0;i<graph.nodeHash[key].roads.length;i++){
             if(graph.nodeHash[key].roads[i].to == key2){
+                historyAct.update("deletePath", null, graph.nodeHash[key].roads[i]);
                 graph.nodeHash[key].roads.splice(i, 1);
             }
         }
@@ -1482,12 +1863,12 @@ class Graph{
             }
         }
         history.update(this.nodeHash);
-        historyAct.update("deletePath");
     }
     showGraph(){
         cnv.clear();
-        cnv.ctx.shadowColor="rgba(137, 183, 26, 1)";
+        cnv.ctx.shadowColor="rgba(255, 0, 0, 1)";
         cnv.ctx.shadowBlur = 0;
+        cnv.ctx.strokeStyle = "black";
         for(let key in this.nodeHash){
             let point = this.nodeHash[key];
             if(point.phantomX != null && point.phantomY != null){
@@ -1551,10 +1932,15 @@ class Graph{
             cnv.ctx.fillStyle = this.nodeHash[key].color || "red";
             cnv.ctx.globalAlpha = this.nodeHash[key].isActive ? 1 : 0.2;
             cnv.ctx.beginPath();
-            cnv.ctx.shadowBlur= this.nodeHash[key].isSelected ? 10 : 0;
+            //cnv.ctx.shadowBlur= this.nodeHash[key].isSelected ? 10 : 0;
             cnv.ctx.arc(this.nodeHash[key].x, this.nodeHash[key].y,this.nodeHash[key].radius, 0 , 2*Math.PI);
             cnv.ctx.fill();
             cnv.ctx.closePath();
+            cnv.ctx.strokeStyle = "red";
+            cnv.ctx.beginPath();
+            if(this.nodeHash[key].isSelected)
+                cnv.ctx.arc(this.nodeHash[key].x, this.nodeHash[key].y,this.nodeHash[key].radius+2, 0 , 2*Math.PI);
+            cnv.ctx.stroke();
         }
         cnv.ctx.globalAlpha = 1;
 
@@ -1571,9 +1957,19 @@ class Graph{
             }
         }
     }
+    allSetActive(){
+        this.allActive = !this.allActive;
+        for(let key in this.nodeHash){
+            this.nodeHash[key].isActive = this.allActive;
+            for(let i = 0;i<this.nodeHash[key].roads.length;i++){
+                this.nodeHash[key].roads[i].isActive = this.allActive;
+            }
+        }
+        history.update(this.nodeHash);
+    }
 }
 class Node{
-    constructor(name,x,y, radius = globalConfig.radius, color = "red", weight = null, active = true){
+    constructor(name,x,y, hash ,radius = globalConfig.radius, color = "blue", weight = null, active = true){
         this.name = name;
         this.color = color;
         this.radius = radius;
@@ -1586,6 +1982,7 @@ class Node{
         this.phantomX = null;
         this.phantomY = null;
         this.roads = [];
+        this.hashCode = hash;
     }
     setColor(color){
         this.color = color;
@@ -1614,7 +2011,7 @@ class Node{
     }
 }
 class Path{
-    constructor(name,namein,nameto,x1,y1,x2,y2,width,stylePath = [0],weight = null,color ="black",select = false, active = true) {
+    constructor(name,namein,nameto,hash,x1,y1,x2,y2,width,stylePath = [0],weight = null,color ="black",select = false, active = true) {
         this.to = nameto;
         this.in = namein;
         this.name = name;
@@ -1630,6 +2027,7 @@ class Path{
         this.isConfig = false;
         this.stylePath = stylePath;
         this._color = null;
+        this.hashCode = hash;
     }
     setColor(color){
         this.color = color;
@@ -1664,9 +2062,11 @@ window.addEventListener("load",async ()=>{
     serverloader = new ServerConnector();
     embedmodule = new EmbededModule();
     await serverloader.getmodules();
-    menuProperty = new MenuPropertyGraph();
+    embedmodule.embed(serverloader.modul);
+    embedmodule.initfunc(serverloader.modul);
     cnv = new CNV();
     graph = new Graph();
+    menuProperty = new MenuPropertyGraph();
     menu = new ContextMenu();
     history = new History();
     historyAct = new HistoryAction();
@@ -1676,8 +2076,6 @@ window.addEventListener("load",async ()=>{
     cnv.clear();
     cnv.register();
     history.update(graph.nodeHash);
-    embedmodule.embed(serverloader.modul);
-    embedmodule.initfunc(serverloader.modul);
     //serverloader.run();
     requestAnimationFrame(loop);
     initElems();
@@ -1686,12 +2084,13 @@ window.addEventListener("scroll", ()=>{
     if(cnv)
         cnv.init();
 });
+let taskOption;
 async function preGetTask(elemHTMLTask) {
-    let taskOption = await serverloader.gettask();
+    taskOption = await serverloader.gettask();
     console.log(taskOption);
     elemHTMLTask.children[0].innerText = `Задача #${taskOption["id"]}`;
     elemHTMLTask.children[1].innerText = `${taskOption["description"]}`;
-
+    historyText = "";
     isConstruct = false;
     menuLeft.toggle();
     historyAct.clear();
@@ -1701,6 +2100,10 @@ async function preGetTask(elemHTMLTask) {
     props.rightClickMouse = taskOption["actionMouse"].rightClickMouse;
     history.clear();
     graph = new Graph();
+    colorstoSolution = [];
+    for(let i = 0;i<taskOption["colors"].length;i++){
+        colorstoSolution.push(taskOption["colors"][i]);
+    }
 
 }
 function initElems(){
@@ -1710,6 +2113,7 @@ function initElems(){
     let module_elem = document.querySelector("#mdl");
     let api_elem = document.querySelector("#api");
     let task_learn_elem = document.querySelector("#lrn");
+    let solution_show_elem = document.querySelector("#sol");
 
     let taskShow = document.querySelector(".tasks");
     let infoShow = document.querySelector(".actions");
@@ -1717,6 +2121,7 @@ function initElems(){
     let modulesShow = document.querySelector(".modules");
     let apiShow = document.querySelector(".api-block");
     let newTaskShow = document.querySelector(".task-text");
+    let solutionShow = document.querySelector(".history-solution");
 
     taskShow.style.display = "flex";
     task_elem.addEventListener("click", ()=>{
@@ -1726,12 +2131,19 @@ function initElems(){
         modulesShow.style.display = "none";
         apiShow.style.display = "none";
         newTaskShow.style.display = "none";
+        solutionShow.style.display = "none";
         isConstruct = true;
         menuLeft.toggle();
         historyAct.clear();
         statistics.toggle();
+        statistics.clear();
         history.clear();
         graph = new Graph();
+        colorstoTask = [];
+        menu.clearColors();
+        historyText = "";
+        isDemonstration = false;
+
     });
     info_elem.addEventListener("click", ()=>{
         infoShow.style.display = "flex";
@@ -1740,6 +2152,7 @@ function initElems(){
         modulesShow.style.display = "none";
         apiShow.style.display = "none";
         newTaskShow.style.display = "none";
+        solutionShow.style.display = "none";
     });
     programm_elem.addEventListener("click", ()=>{
         programmShow.style.display = "flex";
@@ -1748,6 +2161,7 @@ function initElems(){
         modulesShow.style.display = "none";
         apiShow.style.display = "none";
         newTaskShow.style.display = "none";
+        solutionShow.style.display = "none";
     });
     module_elem.addEventListener("click", ()=>{
         modulesShow.style.display = "flex";
@@ -1756,6 +2170,7 @@ function initElems(){
         programmShow.style.display = "none";
         apiShow.style.display = "none";
         newTaskShow.style.display = "none";
+        solutionShow.style.display = "none";
     });
     api_elem.addEventListener("click", ()=>{
         apiShow.style.display = "flex";
@@ -1764,6 +2179,7 @@ function initElems(){
         programmShow.style.display = "none";
         modulesShow.style.display = "none";
         newTaskShow.style.display = "none";
+        solutionShow.style.display = "none";
     });
     task_learn_elem.addEventListener("click", ()=>{
         newTaskShow.style.display = "flex";
@@ -1772,7 +2188,33 @@ function initElems(){
         taskShow.style.display = "none";
         programmShow.style.display = "none";
         apiShow.style.display = "none";
+        solutionShow.style.display = "none";
         preGetTask(newTaskShow);
+        isDemonstration = false;
+    });
+    solution_show_elem.addEventListener("click", async()=>{
+        solutionShow.style.display = "flex";
+        newTaskShow.style.display = "none";
+        modulesShow.style.display = "none";
+        infoShow.style.display = "none";
+        taskShow.style.display = "none";
+        programmShow.style.display = "none";
+        apiShow.style.display = "none";
+        let result = await serverloader.getRandomSolution();
+        history.clear();
+        for(let i = 1;i<result["history"].length;i++){
+            let stateJSON = JSON.parse(result["history"][i]);
+            history.update(stateJSON);
+        }
+        history.setLastState();
+        solutionShow.children[1].innerHTML = `Задача: #${result["id"]}`;
+        solutionShow.children[2].innerHTML = `Участник: ${result["name"]}`;
+        solutionShow.children[3].innerHTML = `Лог: ${result["historyText"]}`;
+        console.log(result);
+        isConstruct = false;
+        isDemonstration = true;
+        statistics.clear();
+        statistics.toggle();
     });
 
     let editElem = document.querySelector("#edit");
@@ -1833,8 +2275,11 @@ function initElems(){
                 let regexp = /graph=|graph =|globalConfig|props|serverloader|embedmodule|isConstruct|menuLeft|cnv|menu|menuProperty|history|statistics|colors|globalConfig|graph\.nodeHash\[[a-z][a-z0-9]*] =|graph\.nodeHash\[[a-z][a-z0-9]*]=/;
                 if(!jsonmodule["script"].match(regexp) && (jsonmodule["type"] == "boolean" || jsonmodule["type"] == "integer")){
                     console.log("УСПЕХ");
-                    let formData = document.querySelector("#upload-container");
-                    await serverloader.loadmodule(formData);
+                    jsonmodule["idHash"] = (new Date()).toString().hashCode();
+                    jsonmodule["verif"] = "ok";
+                    //let formData = document.querySelector("#upload-container");
+                    //await serverloader.loadmodule(formData);
+                    await serverloader.loadmodule(JSON.stringify(jsonmodule));
                 }
             }
 
@@ -1846,6 +2291,38 @@ function initElems(){
         //console.log(file.files[0]);
 
     });
+
+    let loadSolutionModule = document.querySelector("#load-solution");
+    let resultBlock =  document.querySelector(".status-response");
+    let studentInfo = document.querySelector("#student-info");
+    loadSolutionModule.addEventListener("click", async ()=>{
+        if(studentInfo.value == "")
+            return;
+        let outData = {};
+        for(let key in taskOption["option"]){
+            let result = matchingElemFunc[key].call(graph);
+            outData[key] = result;
+        }
+        outData["id"] = taskOption["id"];
+        outData["historyText"] = historyText;
+        outData["history"] = history.state;
+        outData["name"] = studentInfo.value;
+        let response = await serverloader.loadsolution(outData);
+        console.log(outData);
+        console.log(response);
+        if(response == "success"){
+            resultBlock.className = "status-response status-response-ok";
+            resultBlock.innerText = "Решение верно";
+        }
+        else{
+            resultBlock.className = "status-response status-response-error";
+            resultBlock.innerText = "Решение неверно";
+        }
+    });
+    let elemAllActiveChange = document.querySelector("#all-active");
+    elemAllActiveChange.addEventListener("click", ()=>{
+        graph.allSetActive();
+    })
 
 }
 function loop(){
