@@ -25,7 +25,7 @@ let history;
 let statistics;
 let historyAct;
 let matchingElemFunc = {};
-let typeTask = null;
+let typeTask = 1;
 
 
 let colorstoTask = [];
@@ -41,7 +41,7 @@ Object.defineProperty(String.prototype, 'hashCode', {
         return hash;
     }
 });
-function  includeToSubgraph(elem) {
+function includeToSubgraph(elem) {
     if(elem.isActive){
         if(elem instanceof Node){
             let key = graph.getKey(elem.x, elem.y);
@@ -58,6 +58,7 @@ function  includeToSubgraph(elem) {
                 elem.weight,
                 elem.isActive);
             console.log(subgraph);
+            menuProperty.update("ALL", subgraph);
         }
         else{
             let key1 = graph.getKey(elem.xStart, elem.yStart);
@@ -72,10 +73,27 @@ function  includeToSubgraph(elem) {
                     flag2 = true;
                 }
             }
+            let path = null;
+            for(let l in graph.nodeHash){
+                for(let i = 0;i<graph.nodeHash[l].roads.length;i++){
+                    if(graph.nodeHash[l].roads[i].in == key1 && graph.nodeHash[l].roads[i].to == key2){
+                        path = graph.nodeHash[l].roads[i];
+                        break;
+                    }
+                }
+            }
             if(flag1 && flag2){
                 subgraph.addPath(key1, key2);
+                subgraph.nodeHash[key1].roads[subgraph.nodeHash[key1].roads.length - 1].name =path.name;
+                subgraph.nodeHash[key1].roads[subgraph.nodeHash[key1].roads.length - 1].color =path.color;
+                subgraph.nodeHash[key1].roads[subgraph.nodeHash[key1].roads.length - 1].width =path.width;
+                subgraph.nodeHash[key1].roads[subgraph.nodeHash[key1].roads.length - 1].weight = path.weight;
+
+                subgraph.nodeHash[key2].roads[subgraph.nodeHash[key2].roads.length - 1].name =path.name;
+                subgraph.nodeHash[key2].roads[subgraph.nodeHash[key2].roads.length - 1].color =path.color;
+                subgraph.nodeHash[key2].roads[subgraph.nodeHash[key2].roads.length - 1].width =path.width;
+                subgraph.nodeHash[key2].roads[subgraph.nodeHash[key2].roads.length - 1].weight = path.weight;
                 console.log(subgraph);
-                return;
             }
             if(!flag1 && !flag2){
                 let elem1 = graph.nodeHash[key1];
@@ -97,6 +115,18 @@ function  includeToSubgraph(elem) {
                     elem2.weight,
                     elem2.isActive);
                 subgraph.addPath(key1, key2);
+                subgraph.nodeHash[key1].roads[subgraph.nodeHash[key1].roads.length - 1].name =path.name;
+                subgraph.nodeHash[key1].roads[subgraph.nodeHash[key1].roads.length - 1].color =path.color;
+                subgraph.nodeHash[key1].roads[subgraph.nodeHash[key1].roads.length - 1].width =path.width;
+                subgraph.nodeHash[key1].roads[subgraph.nodeHash[key1].roads.length - 1].weight = path.weight;
+
+                subgraph.nodeHash[key2].roads[subgraph.nodeHash[key2].roads.length - 1].name =path.name;
+                subgraph.nodeHash[key2].roads[subgraph.nodeHash[key2].roads.length - 1].color =path.color;
+                subgraph.nodeHash[key2].roads[subgraph.nodeHash[key2].roads.length - 1].width =path.width;
+                subgraph.nodeHash[key2].roads[subgraph.nodeHash[key2].roads.length - 1].weight = path.weight;
+
+
+
                 graph.nodeHash[key1].isActive = true;
                 graph.nodeHash[key2].isActive = true;
                 console.log(subgraph);
@@ -113,6 +143,15 @@ function  includeToSubgraph(elem) {
                     elem1.isActive);
                 subgraph.addPath(key1, key2);
                 graph.nodeHash[key1].isActive = true;
+                subgraph.nodeHash[key1].roads[subgraph.nodeHash[key1].roads.length - 1].name =path.name;
+                subgraph.nodeHash[key1].roads[subgraph.nodeHash[key1].roads.length - 1].color =path.color;
+                subgraph.nodeHash[key1].roads[subgraph.nodeHash[key1].roads.length - 1].width =path.width;
+                subgraph.nodeHash[key1].roads[subgraph.nodeHash[key1].roads.length - 1].weight = path.weight;
+
+                subgraph.nodeHash[key2].roads[subgraph.nodeHash[key2].roads.length - 1].name =path.name;
+                subgraph.nodeHash[key2].roads[subgraph.nodeHash[key2].roads.length - 1].color =path.color;
+                subgraph.nodeHash[key2].roads[subgraph.nodeHash[key2].roads.length - 1].width =path.width;
+                subgraph.nodeHash[key2].roads[subgraph.nodeHash[key2].roads.length - 1].weight = path.weight;
                 console.log(subgraph);
             }
             if(flag1 && !flag2){
@@ -127,9 +166,18 @@ function  includeToSubgraph(elem) {
                     elem2.isActive);
                 subgraph.addPath(key1, key2);
                 graph.nodeHash[key2].isActive = true;
+                subgraph.nodeHash[key1].roads[subgraph.nodeHash[key1].roads.length - 1].name =path.name;
+                subgraph.nodeHash[key1].roads[subgraph.nodeHash[key1].roads.length - 1].color =path.color;
+                subgraph.nodeHash[key1].roads[subgraph.nodeHash[key1].roads.length - 1].width =path.width;
+                subgraph.nodeHash[key1].roads[subgraph.nodeHash[key1].roads.length - 1].weight = path.weight;
+
+                subgraph.nodeHash[key2].roads[subgraph.nodeHash[key2].roads.length - 1].name =path.name;
+                subgraph.nodeHash[key2].roads[subgraph.nodeHash[key2].roads.length - 1].color =path.color;
+                subgraph.nodeHash[key2].roads[subgraph.nodeHash[key2].roads.length - 1].width =path.width;
+                subgraph.nodeHash[key2].roads[subgraph.nodeHash[key2].roads.length - 1].weight = path.weight;
                 console.log(subgraph);
             }
-
+            menuProperty.update("ALL", subgraph);
             /*graph.nodeHash[key].roads.push(new Path(roads[i].name,
                 roads[i].in,
                 roads[i].to,
@@ -145,6 +193,7 @@ function  includeToSubgraph(elem) {
 
                 false, roads[i].isActive));*/
         }
+
     }
     else{
         if(elem instanceof Node){
@@ -164,13 +213,16 @@ function  includeToSubgraph(elem) {
             }
             console.log("DEL");
             console.log(subgraph);
+            menuProperty.update("ALL", subgraph);
         }
         else{
             let key1 = graph.getKey(elem.xStart, elem.yStart);
             let key2 = graph.getKey(elem.xEnd, elem.yEnd);
             subgraph.deletePath(key1,key2);
             console.log(subgraph);
+            menuProperty.update("ALL", subgraph);
         }
+
     }
 }
 function invert(value){
@@ -185,6 +237,7 @@ class Task{
         this.hints = hints.slice();
         this.option = {};
         this.colors = [];
+        this.start = type == 2 ? graph.nodeHash : "";
         this.loadoption();
     }
     loadoption(){
@@ -204,7 +257,19 @@ class Task{
                     }
                 }
             };break;
-            case 2:break;
+            case 2:{
+                for(let i = 0;i<taskLst.children.length;i++){
+                    if(taskLst.children[i].children[2].children[0].checked){
+                        let key = taskLst.children[i].children[1].id;
+                        let value = taskLst.children[i].children[1].value;
+                        if(taskLst.children[i].children[1].type == "text")
+                            value = taskLst.children[i].children[1].value;
+                        else
+                            value = taskLst.children[i].children[1].checked;
+                        this.option[key] = value;
+                    }
+                }
+            };break;
         }
         for(let i = 0;i<colorstoTask.length;i++)
             this.colors.push(colorstoTask[i]);
@@ -344,7 +409,11 @@ function multiEdit(x, y, arrToAdd){
     if(arrToAdd.length < 1 && isFree) {
         graph.add(x, y);
         arrToAdd.push({x,y, key: graph.getKey(x,y)});
-        menuProperty.update("add");
+        //menuProperty.update("add");
+        if(typeTask == 1)
+            menuProperty.update("add",graph);
+        if(typeTask == 2)
+            menuProperty.update("add",subgraph);
     }
     else if(arrToAdd.length < 1 && !isFree){
         arrToAdd.push({x:node.x,y:node.y, key: graph.getKey(node.x,node.y)});
@@ -355,8 +424,16 @@ function multiEdit(x, y, arrToAdd){
             graph.add(x, y);
             arrToAdd.push({x,y, key: graph.getKey(x,y)});
             graph.addPath(key1, graph.getKey(x,y));
-            menuProperty.update("addPath");
-            menuProperty.update("add");
+            if(typeTask == 1){
+                menuProperty.update("addPath", graph);
+                menuProperty.update("add", graph);
+            }
+            if(typeTask == 2){
+                menuProperty.update("addPath", subgraph);
+                menuProperty.update("add", subgraph);
+            }
+            //menuProperty.update("addPath");
+            //menuProperty.update("add");
         }
         else{
             /*if(graph.getKey(node.x,node.y) != arrToAdd[arrToAdd.length - 2].key){
@@ -387,7 +464,13 @@ function multiEdit(x, y, arrToAdd){
             if(key1 != graph.getKey(node.x,node.y) && !flag){
                 arrToAdd.push({x:node.x,y:node.y, key: graph.getKey(node.x,node.y)});
                 graph.addPath(key1, graph.getKey(node.x,node.y));
-                menuProperty.update("addPath");
+                if(typeTask == 1){
+                    menuProperty.update("addPath", graph);
+                }
+                if(typeTask == 2){
+                    menuProperty.update("addPath", subgraph);
+                }
+               // menuProperty.update("addPath");
                 for(let i = 0;i<arrToAdd.length-1;i++){
                     graph.nodeHash[arrToAdd[i].key].phantomX = null;
                     graph.nodeHash[arrToAdd[i].key].phantomY = null;
@@ -442,6 +525,7 @@ function selectToCanvas(x,y) {
             Math.abs(graph.nodeHash[key].y -y) <= graph.nodeHash[key].radius){
             if(!menu.blocked) {
                 graph.nodeHash[key].setActive();
+                includeToSubgraph(graph.nodeHash[key]);
                 return;
             }
         }
@@ -454,7 +538,8 @@ function selectToCanvas(x,y) {
                 (((x > graph.nodeHash[key].roads[i].xStart && x < graph.nodeHash[key].roads[i].xEnd) || (x > graph.nodeHash[key].roads[i].xEnd && x < graph.nodeHash[key].roads[i].xStart)) &&
                     (y > graph.nodeHash[key].roads[i].yStart && y < graph.nodeHash[key].roads[i].yEnd && !menu.blocked)
                 )){
-                setPropertyPath(graph.nodeHash[key].roads[i].to, graph.nodeHash[key].roads[i].in, 1, graph.nodeHash[key].roads[i].setActive)
+                setPropertyPath(graph.nodeHash[key].roads[i].to, graph.nodeHash[key].roads[i].in, 1, graph.nodeHash[key].roads[i].setActive);
+                includeToSubgraph(graph.nodeHash[key].roads[i]);
                 //graph.nodeHash[key].roads[i].setActive();
 
             }
@@ -650,7 +735,13 @@ class History{
             //graph.nodeHash[key].roads = JSON.parse(roads);
             roads = [];
         }
-        menuProperty.update("ALL");
+        if(typeTask == 1){
+            menuProperty.update("ALL", graph);
+        }
+        if(typeTask == 2){
+            menuProperty.update("ALL", subgraph);
+        }
+        //menuProperty.update("ALL");
         if(this.index == 0){
             if(!isDemonstration){
                 this.state = [];
@@ -680,7 +771,13 @@ class History{
                 }
                 roads = [];
             }
-            menuProperty.update("ALL");
+            if(typeTask == 1){
+                menuProperty.update("ALL", graph);
+            }
+            if(typeTask == 2){
+                menuProperty.update("ALL", subgraph);
+            }
+            //menuProperty.update("ALL");
             if(this.index == this.state.length - 1){
                 this.nextElem.disabled = true;
             }
@@ -707,17 +804,18 @@ class Statistics{
             this.statisticElem.children[i].style.display = this.prps[i] ? "block" : "none";
         }
     }
-    update(){
-        this.statisticElem.children[0].children[0].innerText = graph.getCountNodes();
-        this.statisticElem.children[1].children[0].innerText = graph.getCountPath();
-        this.statisticElem.children[2].children[0].innerText = graph.getConnectComponentCount();
-        this.statisticElem.children[3].children[0].innerText = graph.getCyclomaticNumber();
-        this.statisticElem.children[4].children[0].innerText = graph.isDicotyledonous();
-        this.statisticElem.children[5].children[0].innerText = graph.isTree();
-        this.statisticElem.children[6].children[0].innerText = graph.isWood();
-        this.statisticElem.children[7].children[0].innerText = graph.isCycle();
-        this.statisticElem.children[8].children[0].innerText = graph.isBiconnected();
-        this.statisticElem.children[9].children[0].innerText = graph.isRegular();
+    update(context){
+        console.log(context);
+        this.statisticElem.children[0].children[0].innerText = context.getCountNodes();
+        this.statisticElem.children[1].children[0].innerText = context.getCountPath();
+        this.statisticElem.children[2].children[0].innerText = context.getConnectComponentCount();
+        this.statisticElem.children[3].children[0].innerText = context.getCyclomaticNumber();
+        this.statisticElem.children[4].children[0].innerText = context.isDicotyledonous();
+        this.statisticElem.children[5].children[0].innerText = context.isTree();
+        this.statisticElem.children[6].children[0].innerText = context.isWood();
+        this.statisticElem.children[7].children[0].innerText = context.isCycle();
+        this.statisticElem.children[8].children[0].innerText = context.isBiconnected();
+        this.statisticElem.children[9].children[0].innerText = context.isRegular();
 
         let j = 0;
         for(let i = 10;i< this.statisticElem.children.length;i++){
@@ -780,7 +878,7 @@ class MenuPropertyGraph{
             "checkWood":graph.isWood,
             "checkConnected":graph.isBiconnected
         };
-       let wrapper = document.querySelector(".task-lst");
+        let wrapper = document.querySelector(".task-lst");
         let len = wrapper.children.length;
         let j = 0;
         for(let i = len - embedmodule.funcStorage.length;i< wrapper.children.length;i++){
@@ -833,10 +931,20 @@ class MenuPropertyGraph{
                 //false = tip1
                 //true = tip2
                 if(this.paElem.checked){
+                    history.clear();
                     //упаковка графа
                     props.leftClickMouse = selectLeft;
                     props.rightClickMouse = selectRight;
-
+                    for(let key in graph.nodeHash){
+                        graph.nodeHash[key].isActive = false;
+                        for(let i = 0;i<graph.nodeHash[key].roads.length;i++){
+                            graph.nodeHash[key].roads[i].isActive = false;
+                        }
+                    }
+                    let newTask = new Task(2, props, prps);
+                    graph = new Graph();
+                    console.log(newTask);
+                    serverloader.loadtask(newTask);
                 }
                 else{
                     history.clear();
@@ -879,24 +987,26 @@ class MenuPropertyGraph{
         }
     }
 
-    update(action){
-       switch (action) {
-           case "add":this.nodesElemCount.value = graph.getCountNodes();break;
-           case "delete":this.nodesElemCount.value = graph.getCountNodes();this.pathElemCount.value = graph.getCountPath();break;
-           case "addPath":this.pathElemCount.value = graph.getCountPath();break;
+    update(action, context){
+       /*switch (action) {
+           case "add":this.nodesElemCount.value = context.getCountNodes();break;
+           case "delete":this.nodesElemCount.value = context.getCountNodes();this.pathElemCount.value = context.getCountPath();break;
+           case "addPath":this.pathElemCount.value = context.getCountPath();break;
            case "ALL":{
-               this.nodesElemCount.value = graph.getCountNodes();
-               this.pathElemCount.value = graph.getCountPath();
+               this.nodesElemCount.value = context.getCountNodes();
+               this.pathElemCount.value = context.getCountPath();
            };break;
-       }
-        this.connectElemCount.value = graph.getConnectComponentCount();
-        this.cyclomaticElemCount.value = graph.getCyclomaticNumber();
-        this.checkedElemCycle.checked = graph.isCycle();
-        this.checkedElemTree.checked = graph.isTree();
-        this.checkWoodElem.checked = graph.isWood();
-        this.checkDicotyledonousElem.checked = graph.isDicotyledonous();
-        this.biconnectElem.checked = graph.isBiconnected();
-        this.checkedRegularElem.checked = graph.isRegular();
+       }*/
+        this.nodesElemCount.value = context.getCountNodes();
+        this.pathElemCount.value = context.getCountPath();
+        this.connectElemCount.value = context.getConnectComponentCount();
+        this.cyclomaticElemCount.value = context.getCyclomaticNumber();
+        this.checkedElemCycle.checked = context.isCycle();
+        this.checkedElemTree.checked = context.isTree();
+        this.checkWoodElem.checked = context.isWood();
+        this.checkDicotyledonousElem.checked = context.isDicotyledonous();
+        this.biconnectElem.checked = context.isBiconnected();
+        this.checkedRegularElem.checked = context.isRegular();
 
         let wrapper = document.querySelector(".task-lst");
         let j = 0;
@@ -912,7 +1022,7 @@ class MenuPropertyGraph{
 
             j++;
         }
-        statistics.update(this);
+        statistics.update(context);
         this.updateText();
     }
 }
@@ -1329,7 +1439,13 @@ class CNV {
                             }
                         }
                         graph.add(x, y);
-                        menuProperty.update("add");
+                        if(typeTask == 1){
+                            menuProperty.update("add", graph);
+                        }
+                        if(typeTask == 2){
+                            menuProperty.update("add", subgraph);
+                        }
+                        //menuProperty.update("add");
                     }
                     //выделение вершины
                     if (menuLeft.mode == 2 && !menu.blocked) {
@@ -1356,7 +1472,13 @@ class CNV {
                         if(arrToAdd.length < 1 && isFree) {
                             graph.add(x, y);
                             arrToAdd.push({x,y, key: graph.getKey(x,y)});
-                            menuProperty.update("add");
+                            if(typeTask == 1){
+                                menuProperty.update("add", graph);
+                            }
+                            if(typeTask == 2){
+                                menuProperty.update("add", subgraph);
+                            }
+                            //menuProperty.update("add");
                         }
                         else if(arrToAdd.length < 1 && !isFree){
                             arrToAdd.push({x:node.x,y:node.y, key: graph.getKey(node.x,node.y)});
@@ -1367,8 +1489,16 @@ class CNV {
                                 graph.add(x, y);
                                 arrToAdd.push({x,y, key: graph.getKey(x,y)});
                                 graph.addPath(key1, graph.getKey(x,y));
-                                menuProperty.update("addPath");
-                                menuProperty.update("add");
+                                if(typeTask == 1){
+                                    menuProperty.update("addPath", graph);
+                                    menuProperty.update("add", graph);
+                                }
+                                if(typeTask == 2){
+                                    menuProperty.update("addPath", subgraph);
+                                    menuProperty.update("add", subgraph);
+                                }
+                                //menuProperty.update("addPath");
+                                //menuProperty.update("add");
                             }
                             else{
                                 /*if(graph.getKey(node.x,node.y) != arrToAdd[arrToAdd.length - 2].key){
@@ -1399,7 +1529,13 @@ class CNV {
                                 if(key1 != graph.getKey(node.x,node.y) && !flag){
                                     arrToAdd.push({x:node.x,y:node.y, key: graph.getKey(node.x,node.y)});
                                     graph.addPath(key1, graph.getKey(node.x,node.y));
-                                    menuProperty.update("addPath");
+                                    if(typeTask == 1){
+                                        menuProperty.update("addPath", graph);
+                                    }
+                                    if(typeTask == 2){
+                                        menuProperty.update("addPath", subgraph);
+                                    }
+                                    //menuProperty.update("addPath");
                                     for(let i = 0;i<arrToAdd.length-1;i++){
                                         graph.nodeHash[arrToAdd[i].key].phantomX = null;
                                         graph.nodeHash[arrToAdd[i].key].phantomY = null;
@@ -1448,7 +1584,13 @@ class CNV {
                             graph.nodeHash[arrToPath[1]].isSelected = false;
                             graph.nodeHash[arrToPath[0]].phantomX = null;
                             graph.nodeHash[arrToPath[0]].phantomY = null;
-                            menuProperty.update("addPath");
+                            //menuProperty.update("addPath");
+                            if(typeTask == 1){
+                                menuProperty.update("addPath", graph);
+                            }
+                            if(typeTask == 2){
+                                menuProperty.update("addPath", subgraph);
+                            }
                             arrToPath = [];
                         }
                     }
@@ -1458,7 +1600,13 @@ class CNV {
                             if (Math.abs(graph.nodeHash[key].x - x) <= graph.nodeHash[key].radius &&
                                 Math.abs(graph.nodeHash[key].y - y) <= graph.nodeHash[key].radius) {
                                 graph.deleteNode(graph.nodeHash[key]);
-                                menuProperty.update("delete");
+                                if(typeTask == 1){
+                                    menuProperty.update("delete", graph);
+                                }
+                                if(typeTask == 2){
+                                    menuProperty.update("delete", subgraph);
+                                }
+                                //menuProperty.update("delete");
 
                                 return;
                             }
@@ -1472,7 +1620,13 @@ class CNV {
                                         (y > graph.nodeHash[key].roads[i].yStart && y < graph.nodeHash[key].roads[i].yEnd)
                                 )){
                                     graph.deletePath(graph.nodeHash[key].roads[i].in, graph.nodeHash[key].roads[i].to);
-                                    menuProperty.update("deletePath");
+                                    if(typeTask == 1){
+                                        menuProperty.update("deletePath", graph);
+                                    }
+                                    if(typeTask == 2){
+                                        menuProperty.update("deletePath", subgraph);
+                                    }
+                                    //menuProperty.update("deletePath");
                                 }
                             }
                         }
@@ -1632,6 +1786,7 @@ class CNV {
                     }
                     if(props.leftClickMouse == "select"){
                         selectToCanvas(x,y);
+                        //statistics.update(subgraph);
                     }
                 }
                 else{
@@ -1644,6 +1799,7 @@ class CNV {
                     }
                     if(props.rightClickMouse == "select"){
                         selectToCanvas(x,y);
+                        statistics.update(typeTask == 2 ? subgraph : graph);
                     }
                     if(props.rightClickMouse == "changecolor"){
                         changeColorCanvas(x,y);
@@ -2579,7 +2735,20 @@ async function preGetTask(elemHTMLTask) {
     props.leftClickMouse = taskOption["actionMouse"].leftClickMouse;
     props.rightClickMouse = taskOption["actionMouse"].rightClickMouse;
     history.clear();
-    graph = new Graph();
+    if(taskOption["type"] == 1){
+        graph = new Graph();
+        typeTask = 1;
+    }
+    else{
+        graph = new Graph();
+        history.clear();
+        let stateJSON = taskOption["start"];
+        typeTask = 2;
+        subgraph = new Graph();
+        history.update(stateJSON);
+        history.setLastState();
+
+    }
     colorstoSolution = [];
     for(let i = 0;i<taskOption["colors"].length;i++){
         colorstoSolution.push(taskOption["colors"][i]);
@@ -2612,6 +2781,8 @@ function initElems(){
         apiShow.style.display = "none";
         newTaskShow.style.display = "none";
         solutionShow.style.display = "none";
+
+
         isConstruct = true;
         menuLeft.toggle();
         historyAct.clear();
@@ -2669,6 +2840,9 @@ function initElems(){
         programmShow.style.display = "none";
         apiShow.style.display = "none";
         solutionShow.style.display = "none";
+
+        resultBlock.className = "";
+        resultBlock.innerText = "";
         preGetTask(newTaskShow);
         isDemonstration = false;
     });
@@ -2778,9 +2952,17 @@ function initElems(){
     loadSolutionModule.addEventListener("click", async ()=>{
         if(studentInfo.value == "")
             return;
+
         let outData = {};
+        let context;
+        if(typeTask == 2){
+            context = subgraph;
+        }
+        else{
+            context = graph;
+        }
         for(let key in taskOption["option"]){
-            let result = matchingElemFunc[key].call(graph);
+            let result = matchingElemFunc[key].call(context);
             outData[key] = result;
         }
         outData["id"] = taskOption["id"];
@@ -2802,6 +2984,10 @@ function initElems(){
     let elemAllActiveChange = document.querySelector("#all-active");
     elemAllActiveChange.addEventListener("click", ()=>{
         graph.allSetActive();
+        if(typeTask == 1)
+            typeTask = 2;
+        else
+            typeTask = 1;
         subgraph = null;
     })
 
