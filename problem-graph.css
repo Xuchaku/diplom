@@ -561,6 +561,7 @@
 .form_radio_group {
     display: none;
     position: absolute;
+    border: 1px solid #ccc;
     left: 0;
     top:0;
     overflow: hidden;
@@ -568,6 +569,8 @@
 .form_radio_group-item {
     display: inline-block;
     float: left;
+    width: 20px;
+    height: 20px;
 }
 .form_radio_group input[type=radio] {
     display: none;
