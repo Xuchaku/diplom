@@ -497,7 +497,7 @@ function changeColorCanvas(x,y){
                 graph.nodeHash[key].setColor(colorstoSolution[gl % colorstoSolution.length]);
                 return;
             }
-        }
+        }1
     }
     //режим меню для пути
     for (let key in graph.nodeHash) {
@@ -1781,7 +1781,6 @@ class CNV {
 
                     }
                     if(props.leftClickMouse == "delete"){
-                        deleteToCanvas(x,y);
                         statistics.update();
                     }
                     if(props.leftClickMouse == "select"){
@@ -1792,7 +1791,6 @@ class CNV {
                 else{
                     if(props.rightClickMouse == "delete"){
                         deleteToCanvas(x,y);
-                        statistics.update();
                     }
                     if(props.rightClickMouse == "construct"){
 
@@ -2708,11 +2706,9 @@ window.addEventListener("load",async ()=>{
     historyAct = new HistoryAction();
     menuLeft = new Menu();
     statistics = new Statistics();
-    console.log("T");
     cnv.clear();
     cnv.register();
     history.update(graph.nodeHash);
-    //serverloader.run();
     requestAnimationFrame(loop);
     initElems();
 });
