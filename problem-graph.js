@@ -129,6 +129,7 @@ function includeToSubgraph(elem) {
 
                 graph.nodeHash[key1].isActive = true;
                 graph.nodeHash[key2].isActive = true;
+                //history.update(graph.nodeHash);
                 console.log(subgraph);
             }
             if(!flag1 && flag2){
@@ -297,7 +298,7 @@ class EmbededModule{
             this.frmstatistic.append(conf[i].name);
             let apiElem = document.createElement('div');
             apiElem.className = `api-elem dev ${conf[i].verif}`;
-            apiElem.innerHTML = `<p>${conf[i].name}() - ${conf[i].desc}. Возвращает тип ${conf[i].type}</p>`;
+            apiElem.innerHTML = `<p>${conf[i].nameFunction} - ${conf[i].desc}. Возвращает тип ${conf[i].type}</p>`;
             this.apiBlock.append(apiElem);
             elemToParams.className = "val";
             switch (conf[i].type) {
@@ -584,8 +585,9 @@ function setPropertyPath(to, ins, value, func){
             func.call(graph.nodeHash[to].roads[i], value);
         }
     }
+
     history.update(graph.nodeHash);
-    console.log("!!!!!!");
+
 }
 class HistoryAction{
     constructor(){
@@ -896,7 +898,13 @@ class MenuPropertyGraph{
             selectRight = this.rkmElem.value;
         });
         this.paElem.addEventListener("change", ()=>{
-            if(this.paElem.checked) {
+            graph.allSetActive();
+            if(typeTask == 1)
+                typeTask = 2;
+            else
+                typeTask = 1;
+            subgraph = null;
+            /*if(this.paElem.checked) {
                 this.elemNewTaskText.style.display = "none";
                 typeTask = 2;
             }
@@ -904,7 +912,7 @@ class MenuPropertyGraph{
                 this.elemNewTaskText.style.display = "block";
                 typeTask = 1;
                 subgraph = null;
-            }
+            }*/
         });
         this.createTaskElem.addEventListener("click", ()=>{
             if(selectLeft == selectRight){
@@ -955,7 +963,7 @@ class MenuPropertyGraph{
                     let newTask = new Task(1, props, prps);
                     console.log(newTask);
                     serverloader.loadtask(newTask);
-                    statistics.update();
+                    statistics.update(graph);
                 }
             }
         });
@@ -2477,6 +2485,7 @@ class Graph{
         let path2 = new Path("",key2, key, hash, this.nodeHash[key2].x,  this.nodeHash[key2].y, this.nodeHash[key].x,  this.nodeHash[key].y, 1, globalConfig.stylePath, null);
         this.nodeHash[key].roads.push(path1);
         this.nodeHash[key2].roads.push(path2);
+
         history.update(this.nodeHash);
         historyAct.update("addPath", null, path1);
     }
@@ -2711,6 +2720,7 @@ window.addEventListener("load",async ()=>{
     history.update(graph.nodeHash);
     requestAnimationFrame(loop);
     initElems();
+    console.log(serverloader.modul);
 });
 window.addEventListener("scroll", ()=>{
     if(cnv)
@@ -2895,41 +2905,59 @@ function initElems(){
     let loadModuleElem = document.querySelector("#loadmodule");
     loadModuleElem.addEventListener("click", async (e)=>{
         e.preventDefault();
+        let usedFunctionName = [];
+        let scriptBody = {};
+        for(let i = 0;i<serverloader.modul.length;i++){
+            let index = serverloader.modul[i]["script"].indexOf('{');
+            let index2 = index;
+            while(serverloader.modul[i]["script"][index2] != " "){
+                index2--;
+            }
+            usedFunctionName.push(serverloader.modul[i]["script"].substring(index2+1, index));
+            scriptBody[serverloader.modul[i]["script"].substring(index2+1, index)] = serverloader.modul[i]["script"].substring(1, serverloader.modul[i]["script"].length - 1);
+        }
         let file = document.querySelector("#file-input-module").files[0];
         let reader = new FileReader();
         reader.readAsText(file);
         reader.addEventListener("load",async()=>{
             let jsonmodule = JSON.parse(reader.result);
             if(jsonmodule["name"] && jsonmodule["type"] && jsonmodule["desc"] && jsonmodule["script"]){
-                /*
-                let gl = 0;
-                let globalConfig = {
-                    radius: 5
-                };
-                let props = {
-                    leftClickMouse: null,
-                    rightClickMouse: null
-                };
-                let serverloader = null;
-                let embedmodule = null;
-                let isConstruct = true;
-                let menuLeft;
-                let graph;
-                let cnv;
-                let menu;
-                let menuProperty;
-                let history;
-                let statistics;
-                let historyAct;
-                */
+
+                let index = jsonmodule["script"].indexOf('{');
+                let index2 = index;
+                while(jsonmodule["script"][index2] != " "){
+                    index2--;
+                }
+
+
                 let regexp = /graph=|graph =|globalConfig|props|serverloader|embedmodule|isConstruct|menuLeft|cnv|menu|menuProperty|history|statistics|colors|globalConfig|graph\.nodeHash\[[a-z][a-z0-9]*] =|graph\.nodeHash\[[a-z][a-z0-9]*]=/;
-                if(!jsonmodule["script"].match(regexp) && (jsonmodule["type"] == "boolean" || jsonmodule["type"] == "integer")){
-                    console.log("УСПЕХ");
+                if(!jsonmodule["script"].match(regexp) && (jsonmodule["type"] == "boolean" || jsonmodule["type"] == "integer") && !usedFunctionName.includes(jsonmodule["script"].substring(index2+1, index))){
+                    console.log("Load");
+                    let scr = "";
+                    scr += jsonmodule["script"].substring(0, index+1);
+
+                    let pos = 0;
+                    for(let key in scriptBody){
+                        while (true) {
+                            let foundPos = jsonmodule["script"].indexOf(key, pos);
+                            if (foundPos == -1) break;
+                            pos = foundPos + 1;
+                            console.log(scriptBody[key]);
+                            scr+=scriptBody[key];
+                        }
+                    }
+                    scr += jsonmodule["script"].substring(index+1);
+                    console.log(scr);
+
+                    jsonmodule["script"] = scr;
+                    jsonmodule['nameFunction'] = jsonmodule["script"].substring(index2+1, index);
                     jsonmodule["idHash"] = (new Date()).toString().hashCode();
                     jsonmodule["verif"] = "ok";
-                    //let formData = document.querySelector("#upload-container");
-                    //await serverloader.loadmodule(formData);
+
                     await serverloader.loadmodule(JSON.stringify(jsonmodule));
+                }
+                else{
+                    console.log("no load");
                 }
             }
 
@@ -2963,7 +2991,11 @@ function initElems(){
         }
         outData["id"] = taskOption["id"];
         outData["historyText"] = historyText;
-        outData["history"] = history.state;
+        let state = [];
+        for(let i = 0;i<= history.index;i++){
+            state.push(history.state[i]);
+        }
+        outData["history"] = state;
         outData["name"] = studentInfo.value;
         let response = await serverloader.loadsolution(outData);
         console.log(outData);
@@ -2977,15 +3009,7 @@ function initElems(){
             resultBlock.innerText = "Решение неверно";
         }
     });
-    let elemAllActiveChange = document.querySelector("#all-active");
-    elemAllActiveChange.addEventListener("click", ()=>{
-        graph.allSetActive();
-        if(typeTask == 1)
-            typeTask = 2;
-        else
-            typeTask = 1;
-        subgraph = null;
-    })
+
 
 }
 function loop(){
