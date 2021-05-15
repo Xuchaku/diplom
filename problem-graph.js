@@ -648,6 +648,8 @@ class History{
         this.backElem = document.querySelector(".back");
         this.nextElem = document.querySelector(".next");
         this.state = [];
+        this.statesubgraph = [];
+        this.indexsub = 1;
         this.index = 1;
         this.init();
     }
