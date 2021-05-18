@@ -1,12 +1,11 @@
 const express = require("express");
 const app = express();
 const fs = require('fs');
-const fileUpload = require('express-fileupload');
 const bodyParser = require("body-parser");
 
 //app.use(bodyParser.json());
 //app.use(bodyParser.urlencoded({ extended: true }));
-app.use(bodyParser.text({ type: 'text/plain' }))
+app.use(bodyParser.text({ type: 'text/plain' }));
 app.use(express.json());
 //app.use(fileUpload({}));
 app.use(express.static(__dirname));
@@ -39,10 +38,35 @@ app.get("/getmodules", function(request, response){
 app.get("/getsolution", function (request,response) {
     let data = fs.readFileSync("./solutions/allsolutions.json");
     let solutions = JSON.parse(data.toString());
-    let randomIndex = Math.floor(Math.random()* solutions["allsolutions"].length);
 
+    let nameReq = request.query.name;
+    let idReq = request.query.id;
     response.set("Access-Control-Allow-Origin", "*");
-    response.send(JSON.stringify(solutions["allsolutions"][randomIndex]));
+    for(let i = 0;i<solutions["allsolutions"].length;i++){
+        if(solutions["allsolutions"][i]["name"] == nameReq && solutions["allsolutions"][i]["id"] == idReq){
+            response.send(JSON.stringify(solutions["allsolutions"][i]));
+        }
+    }
+    response.set("Access-Control-Allow-Origin", "*");
+    response.send(JSON.stringify(null));
+    //response.send(JSON.stringify(solutions["allsolutions"][randomIndex]));
+});
+app.get("/getallsolution", function (request,response) {
+    let data = fs.readFileSync("./solutions/allsolutions.json");
+    let solutions = JSON.parse(data.toString());
+    let objHash = {};
+    for(let i = 0;i<solutions["allsolutions"].length;i++){
+        let name = solutions["allsolutions"][i]["name"];
+        if(name in objHash){
+            objHash[name].push(solutions["allsolutions"][i]["id"]);
+        }
+        else{
+            objHash[name] = [solutions["allsolutions"][i]["id"]];
+        }
+    }
+    console.log(objHash);
+    response.set("Access-Control-Allow-Origin", "*");
+    response.send(JSON.stringify(objHash));
 });
 app.get("/gettask", function(request, response){
     let data = fs.readFileSync("./tasks/alltask.json");

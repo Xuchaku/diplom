@@ -308,6 +308,42 @@
 
 }
 
+.all-solution-lst{
+    display: flex;
+    flex-direction: column;
+    margin-top:15px;
+    background: rgb(222,222,222);
+
+    border-radius: 7px;
+    margin-bottom: 15px;
+}
+.all-solution-lst h3{
+    color: black;
+    font-weight: bold;
+    border: 1px solid #ccc;
+    /* Permalink - use to edit and share this gradient: https://colorzilla.com/gradient-editor/#f2f6f8+0,d8e1e7+50,b5c6d0+51,e0eff9+100;Grey+Gloss+%232 */
+    background: #f2f6f8; /* Old browsers */
+    background: -moz-linear-gradient(top,  #f2f6f8 0%, #d8e1e7 50%, #b5c6d0 51%, #e0eff9 100%); /* FF3.6-15 */
+    background: -webkit-linear-gradient(top,  #f2f6f8 0%,#d8e1e7 50%,#b5c6d0 51%,#e0eff9 100%); /* Chrome10-25,Safari5.1-6 */
+    background: linear-gradient(to bottom,  #f2f6f8 0%,#d8e1e7 50%,#b5c6d0 51%,#e0eff9 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#f2f6f8', endColorstr='#e0eff9',GradientType=0 ); /* IE6-9 */
+    text-align: center;
+    padding: 10px;
+    border-top-right-radius: 7px;
+    border-top-left-radius: 7px;
+    margin:0;
+
+
+}
+.all-solution-lst table p{
+    display: inline;
+}
+p.link-para{
+    color:blue;
+    text-decoration: underline;
+    cursor: pointer;
+}
+
 .history-solution{
     display: none;
     flex-direction: column;
@@ -933,7 +969,8 @@ td:first-child {
 }
 #frm-statistic{
     padding: 5px 10px;
-
+    display: flex;
+    flex-direction: column;
 }
 .type-task{
     display: flex;
@@ -943,7 +980,7 @@ td:first-child {
     align-items: center;
 }
 .type-task > p {
-    font-size: 12px;
+    font-size: 14px;
 
     background: rgb(238,238,238);
     padding: 5px;

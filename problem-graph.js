@@ -57,8 +57,9 @@ function includeToSubgraph(elem) {
                 elem.color,
                 elem.weight,
                 elem.isActive);
-            console.log(subgraph);
             menuProperty.update("ALL", subgraph);
+            history.update(subgraph.nodeHash, 2);
+            history.update(graph.nodeHash);
         }
         else{
             let key1 = graph.getKey(elem.xStart, elem.yStart);
@@ -83,6 +84,7 @@ function includeToSubgraph(elem) {
                 }
             }
             if(flag1 && flag2){
+                //-
                 subgraph.addPath(key1, key2);
                 subgraph.nodeHash[key1].roads[subgraph.nodeHash[key1].roads.length - 1].name =path.name;
                 subgraph.nodeHash[key1].roads[subgraph.nodeHash[key1].roads.length - 1].color =path.color;
@@ -94,6 +96,8 @@ function includeToSubgraph(elem) {
                 subgraph.nodeHash[key2].roads[subgraph.nodeHash[key2].roads.length - 1].width =path.width;
                 subgraph.nodeHash[key2].roads[subgraph.nodeHash[key2].roads.length - 1].weight = path.weight;
                 console.log(subgraph);
+                history.update(subgraph.nodeHash, 2);
+                history.update(graph.nodeHash);
             }
             if(!flag1 && !flag2){
                 let elem1 = graph.nodeHash[key1];
@@ -114,6 +118,7 @@ function includeToSubgraph(elem) {
                     elem2.color,
                     elem2.weight,
                     elem2.isActive);
+                //-
                 subgraph.addPath(key1, key2);
                 subgraph.nodeHash[key1].roads[subgraph.nodeHash[key1].roads.length - 1].name =path.name;
                 subgraph.nodeHash[key1].roads[subgraph.nodeHash[key1].roads.length - 1].color =path.color;
@@ -129,6 +134,8 @@ function includeToSubgraph(elem) {
 
                 graph.nodeHash[key1].isActive = true;
                 graph.nodeHash[key2].isActive = true;
+                history.update(subgraph.nodeHash, 2);
+                history.update(graph.nodeHash);
                 //history.update(graph.nodeHash);
                 console.log(subgraph);
             }
@@ -142,6 +149,7 @@ function includeToSubgraph(elem) {
                     elem1.color,
                     elem1.weight,
                     elem1.isActive);
+                //-
                 subgraph.addPath(key1, key2);
                 graph.nodeHash[key1].isActive = true;
                 subgraph.nodeHash[key1].roads[subgraph.nodeHash[key1].roads.length - 1].name =path.name;
@@ -153,6 +161,8 @@ function includeToSubgraph(elem) {
                 subgraph.nodeHash[key2].roads[subgraph.nodeHash[key2].roads.length - 1].color =path.color;
                 subgraph.nodeHash[key2].roads[subgraph.nodeHash[key2].roads.length - 1].width =path.width;
                 subgraph.nodeHash[key2].roads[subgraph.nodeHash[key2].roads.length - 1].weight = path.weight;
+                history.update(subgraph.nodeHash, 2);
+                history.update(graph.nodeHash);
                 console.log(subgraph);
             }
             if(flag1 && !flag2){
@@ -166,6 +176,7 @@ function includeToSubgraph(elem) {
                     elem2.weight,
                     elem2.isActive);
                 subgraph.addPath(key1, key2);
+                //-
                 graph.nodeHash[key2].isActive = true;
                 subgraph.nodeHash[key1].roads[subgraph.nodeHash[key1].roads.length - 1].name =path.name;
                 subgraph.nodeHash[key1].roads[subgraph.nodeHash[key1].roads.length - 1].color =path.color;
@@ -176,6 +187,8 @@ function includeToSubgraph(elem) {
                 subgraph.nodeHash[key2].roads[subgraph.nodeHash[key2].roads.length - 1].color =path.color;
                 subgraph.nodeHash[key2].roads[subgraph.nodeHash[key2].roads.length - 1].width =path.width;
                 subgraph.nodeHash[key2].roads[subgraph.nodeHash[key2].roads.length - 1].weight = path.weight;
+                history.update(subgraph.nodeHash, 2);
+                history.update(graph.nodeHash);
                 console.log(subgraph);
             }
             menuProperty.update("ALL", subgraph);
@@ -199,6 +212,7 @@ function includeToSubgraph(elem) {
     else{
         if(elem instanceof Node){
             let key = graph.getKey(elem.x, elem.y);
+            //-
             subgraph.deleteNode(subgraph.nodeHash[key]);
             let keys = [];
             for(let i = 0;i<graph.nodeHash[key].roads.length;i++){
@@ -215,13 +229,18 @@ function includeToSubgraph(elem) {
             console.log("DEL");
             console.log(subgraph);
             menuProperty.update("ALL", subgraph);
+            history.update(subgraph.nodeHash, 2);
+            history.update(graph.nodeHash);
         }
         else{
             let key1 = graph.getKey(elem.xStart, elem.yStart);
             let key2 = graph.getKey(elem.xEnd, elem.yEnd);
+            //-
             subgraph.deletePath(key1,key2);
             console.log(subgraph);
             menuProperty.update("ALL", subgraph);
+            history.update(subgraph.nodeHash, 2);
+            history.update(graph.nodeHash);
         }
 
     }
@@ -292,10 +311,15 @@ class EmbededModule{
             statisticElem.innerHTML =  `${conf[i].name} <span></span>`;
             this.statisticUser.append(statisticElem);
             let option = document.createElement('input');
+            let divoption = document.createElement('div');
+            divoption.className = "frm-wr";
             option.type = "checkbox";
             option.className = "value-for-task";
-            this.frmstatistic.append(option);
-            this.frmstatistic.append(conf[i].name);
+            divoption.append(option);
+            divoption.append(conf[i].name);
+            this.frmstatistic.append(divoption);
+            //this.frmstatistic.append(conf[i].name);
+
             let apiElem = document.createElement('div');
             apiElem.className = `api-elem dev ${conf[i].verif}`;
             apiElem.innerHTML = `<p>${conf[i].nameFunction} - ${conf[i].desc}. Возвращает тип ${conf[i].type}</p>`;
@@ -340,16 +364,33 @@ class ServerConnector{
         this.urlloadtask = "settask";
         this.urlloadsolution = "loadsolution";
         this.urlgetsolution = "getsolution";
+        this.urlgetallsolution = "getallsolution";
         this.modul = [];
     }
-    async getRandomSolution(){
-        let fetchResponse = await fetch(this.host + this.urlgetsolution, {
+    async getSolutionByNameId(name, id){
+        let fetchResponse = await fetch(this.host + this.urlgetsolution + "?name=" + name + "&id=" + id, {
             method: 'GET',
         });
         let txt = await fetchResponse.text();
         let data = JSON.parse(txt);
         return data;
     }
+    async getAllSolution(){
+        let fetchResponse = await fetch(this.host + this.urlgetallsolution, {
+            method: 'GET',
+        });
+        let txt = await fetchResponse.text();
+        let data = JSON.parse(txt);
+        return data;
+    }
+    /*async getRandomSolution(){
+        let fetchResponse = await fetch(this.host + this.urlgetsolution, {
+            method: 'GET',
+        });
+        let txt = await fetchResponse.text();
+        let data = JSON.parse(txt);
+        return data;
+    }*/
     async gettask(){
         let fetchResponse = await fetch(this.host + this.urlgettask, {
             method: 'GET',
@@ -585,8 +626,8 @@ function setPropertyPath(to, ins, value, func){
             func.call(graph.nodeHash[to].roads[i], value);
         }
     }
-
-    history.update(graph.nodeHash);
+    if(typeTask == 1)
+        history.update(graph.nodeHash);
 
 }
 class HistoryAction{
@@ -676,31 +717,9 @@ class History{
 
     }
     init(){
+        this.statesubgraph.push(JSON.stringify({}));
         this.backElem.addEventListener("click", ()=>{
             this.back();
-            /*this.nextElem.disabled = false;
-
-            graph.nodeHash = JSON.parse(this.state[--this.index]);
-            for(let key in graph.nodeHash){
-                let roads = [];
-                for(let i =0;i< graph.nodeHash[key].roads.length;i++){
-                    roads.push(graph.nodeHash[key].roads[i]);
-                }
-                //roads = JSON.stringify(roads);
-                graph.nodeHash[key] = new Node(graph.nodeHash[key].name,graph.nodeHash[key].x,graph.nodeHash[key].y, graph.nodeHash[key].radius ,graph.nodeHash[key].color, graph.nodeHash[key].weight);
-                for(let i =0;i< roads.length;i++){
-                    graph.nodeHash[key].roads.push(new Path(roads[i].name, roads[i].in, roads[i].to, roads[i].xStart, roads[i].yStart, roads[i].xEnd, roads[i].yEnd, roads[i].width, roads[i].stylePath ,roads[i].weight ,roads[i].color));
-                }
-                //graph.nodeHash[key].roads = JSON.parse(roads);
-                roads = [];
-            }
-            menuProperty.update("ALL");
-            if(this.index == 0){
-                this.state = [];
-                this.state.push(JSON.stringify({}));
-                this.backElem.disabled = true;
-                this.nextElem.disabled = true;
-            }*/
 
         });
         this.nextElem.addEventListener("click", ()=>{
@@ -709,19 +728,29 @@ class History{
 
         });
     }
-    update(nodeHash){
-        this.state.push(JSON.stringify(nodeHash));
-        this.index = this.state.length - 1;
-        if(this.state.length > 1)
-            this.backElem.disabled = false;
+    update(nodeHash, mode = 1){
+        if(mode == 1){
+            this.state.push(JSON.stringify(nodeHash));
+            this.index = this.state.length - 1;
+            if(this.state.length > 1)
+                this.backElem.disabled = false;
+        }
+        else{
+            this.statesubgraph.push(JSON.stringify(nodeHash));
+            this.indexsub = this.statesubgraph.length - 1;
+            /*if(this.statesubgraph.length > 1)
+                this.backElem.disabled = false*/
+        }
+
 
     }
     clear(){
         this.state = [];
-
+        this.statesubgraph = [];
         this.backElem.disabled = true;
         this.nextElem.disabled = true;
         this.state.push(JSON.stringify({}));
+        this.statesubgraph.push(JSON.stringify({}));
     }
     back(){
         this.nextElem.disabled = false;
@@ -739,6 +768,24 @@ class History{
             //graph.nodeHash[key].roads = JSON.parse(roads);
             roads = [];
         }
+        if(typeTask == 2 && this.indexsub - 1 >= 0 && !isDemonstration){
+            subgraph.nodeHash = JSON.parse(this.statesubgraph[--this.indexsub]);
+            for(let key in subgraph.nodeHash){
+                let roads = [];
+                for(let i =0;i< subgraph.nodeHash[key].roads.length;i++){
+                    roads.push(subgraph.nodeHash[key].roads[i]);
+                }
+                //roads = JSON.stringify(roads);
+                subgraph.nodeHash[key] = new Node(subgraph.nodeHash[key].name,subgraph.nodeHash[key].x,subgraph.nodeHash[key].y,subgraph.nodeHash[key].hashCode ,subgraph.nodeHash[key].radius ,subgraph.nodeHash[key].color, subgraph.nodeHash[key].weight,subgraph.nodeHash[key].isActive);
+                for(let i =0;i< roads.length;i++){
+                    subgraph.nodeHash[key].roads.push(new Path(roads[i].name, roads[i].in, roads[i].to,roads[i].hashCode, roads[i].xStart, roads[i].yStart, roads[i].xEnd, roads[i].yEnd, roads[i].width, roads[i].stylePath ,roads[i].weight ,roads[i].color,false, roads[i].isActive));
+                }
+                //graph.nodeHash[key].roads = JSON.parse(roads);
+                roads = [];
+            }
+        }
+
+
         if(typeTask == 1){
             menuProperty.update("ALL", graph);
         }
@@ -775,6 +822,23 @@ class History{
                 }
                 roads = [];
             }
+            if(typeTask == 2 && this.indexsub + 1 < this.statesubgraph.length && !isDemonstration){
+                subgraph.nodeHash = JSON.parse(this.statesubgraph[++this.indexsub]);
+                for(let key in subgraph.nodeHash){
+                    let roads = [];
+                    for(let i =0;i< subgraph.nodeHash[key].roads.length;i++){
+                        roads.push(subgraph.nodeHash[key].roads[i]);
+                    }
+                    //roads = JSON.stringify(roads);
+                    subgraph.nodeHash[key] = new Node(subgraph.nodeHash[key].name,subgraph.nodeHash[key].x,subgraph.nodeHash[key].y,subgraph.nodeHash[key].hashCode ,subgraph.nodeHash[key].radius ,subgraph.nodeHash[key].color, subgraph.nodeHash[key].weight,subgraph.nodeHash[key].isActive);
+                    for(let i =0;i< roads.length;i++){
+                        subgraph.nodeHash[key].roads.push(new Path(roads[i].name, roads[i].in, roads[i].to,roads[i].hashCode, roads[i].xStart, roads[i].yStart, roads[i].xEnd, roads[i].yEnd, roads[i].width, roads[i].stylePath ,roads[i].weight ,roads[i].color,false, roads[i].isActive));
+                    }
+                    //graph.nodeHash[key].roads = JSON.parse(roads);
+                    roads = [];
+                }
+            }
+
             if(typeTask == 1){
                 menuProperty.update("ALL", graph);
             }
@@ -930,7 +994,7 @@ class MenuPropertyGraph{
                 //isConstruct = false;
                 let prps = [];
                 for(let i =0;i<this.formStatistic.children.length;i++){
-                    prps.push(this.formStatistic.children[i].checked);
+                    prps.push(this.formStatistic.children[i].children[0].checked);
                 }
 
                 //menuLeft.hidden();
@@ -2478,7 +2542,8 @@ class Graph{
                 }
             }
         }
-        history.update(this.nodeHash);
+        if(typeTask == 1)
+            history.update(this.nodeHash);
 
     }
     addPath(key, key2){
@@ -2487,8 +2552,8 @@ class Graph{
         let path2 = new Path("",key2, key, hash, this.nodeHash[key2].x,  this.nodeHash[key2].y, this.nodeHash[key].x,  this.nodeHash[key].y, 1, globalConfig.stylePath, null);
         this.nodeHash[key].roads.push(path1);
         this.nodeHash[key2].roads.push(path2);
-
-        history.update(this.nodeHash);
+        if(typeTask == 1)
+            history.update(this.nodeHash);
         historyAct.update("addPath", null, path1);
     }
     deletePath(key, key2){
@@ -2507,7 +2572,8 @@ class Graph{
                 }
             }
         }
-        history.update(this.nodeHash);
+        if(typeTask == 1)
+            history.update(this.nodeHash);
     }
     showGraph(){
         cnv.clear();
@@ -2646,7 +2712,8 @@ class Node{
     }
     setActive(){
         this.isActive = !this.isActive;
-        history.update(graph.nodeHash);
+        if(typeTask == 1)
+            history.update(graph.nodeHash);
         historyAct.update("setActive", this.isActive, this);
     }
     setWeight(value){
@@ -2763,6 +2830,7 @@ async function preGetTask(elemHTMLTask) {
     }
 
 }
+
 function initElems(){
     let task_elem = document.querySelector("#tsk");
     let info_elem = document.querySelector("#act");
@@ -2772,13 +2840,13 @@ function initElems(){
     let task_learn_elem = document.querySelector("#lrn");
     let solution_show_elem = document.querySelector("#sol");
 
+    let solutionShow = document.querySelector(".history-solution");
     let taskShow = document.querySelector(".tasks");
     let infoShow = document.querySelector(".actions");
     let programmShow = document.querySelector(".programms");
     let modulesShow = document.querySelector(".modules");
     let apiShow = document.querySelector(".api-block");
     let newTaskShow = document.querySelector(".task-text");
-    let solutionShow = document.querySelector(".history-solution");
 
     taskShow.style.display = "flex";
     task_elem.addEventListener("click", ()=>{
@@ -2854,14 +2922,18 @@ function initElems(){
         preGetTask(newTaskShow);
         isDemonstration = false;
     });
+    let solutionTable = document.querySelector(".all-solution-lst").children[1];
     solution_show_elem.addEventListener("click", async()=>{
         solutionShow.style.display = "flex";
+
         newTaskShow.style.display = "none";
         modulesShow.style.display = "none";
         infoShow.style.display = "none";
         taskShow.style.display = "none";
         programmShow.style.display = "none";
         apiShow.style.display = "none";
+        let result = await  serverloader.getAllSolution();
+        /*
         let result = await serverloader.getRandomSolution();
         history.clear();
         for(let i = 1;i<result["history"].length;i++){
@@ -2876,7 +2948,21 @@ function initElems(){
         isConstruct = false;
         isDemonstration = true;
         statistics.clear();
-        statistics.toggle();
+        statistics.toggle();*/
+        let str = ``;
+        solutionTable.innerHTML = "";
+        for(let key in result){
+            str = "<tr>";
+            str +=  `<td>${key}</td>`;
+            str += `<td>`;
+            for(let i = 0;i<result[key].length;i++){
+                str += `<p class="link-para" data-name="${key}" data-id="${result[key][i]}" onclick="getThisSolution(this)" href="${result[key][i]}">#${result[key][i]}</p> `;
+            }
+            str += `</td>`;
+            str += "</tr>";
+            solutionTable.innerHTML += str;
+            str = ``;
+        }
     });
 
     let editElem = document.querySelector("#edit");
@@ -3013,6 +3099,27 @@ function initElems(){
     });
 
 
+}
+async function getThisSolution(target){
+    let solutionShow = document.querySelector(".history-solution");
+    let name = target.getAttribute("data-name");
+    let id = target.getAttribute("data-id");
+    let result = await serverloader.getSolutionByNameId(name,id);
+    history.clear();
+    for(let i = 1;i<result["history"].length;i++){
+        let stateJSON = JSON.parse(result["history"][i]);
+        history.update(stateJSON);
+    }
+    history.setLastState();
+    solutionShow.children[1].innerHTML = `Задача: #${result["id"]}`;
+    solutionShow.children[2].innerHTML = `Участник: ${result["name"]}`;
+    solutionShow.children[3].innerHTML = `Лог: ${result["historyText"]}`;
+    console.log(result);
+    isConstruct = false;
+    isDemonstration = true;
+    statistics.clear();
+    statistics.toggle();
+    console.log(target);
 }
 function loop(){
     graph.showGraph();

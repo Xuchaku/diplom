@@ -93,7 +93,7 @@
                 <div class="type-task">
                     <p>При неактивном состоянии *. Данный тип задачи предлагает участнику создать новый граф с заданными свойствами, причем граф имеющийся при создании ему недоступен. Поле "Текст новой задачи" автоматически заполняется программой, однако имеется возможность поменять условие в ручную. Стоит учитывать то, что только выбранные параметры на графах будут сверяться при решении.</p>
                     <input id="pa" type="checkbox" class="value-for-task">
-                    <p>При активном состоянии *. Данный тип задачи предлагает участнику с помощью выделения выбрать новый подграф в качестве ответа на задачу, причем разработанный при конструировании задачи граф будет доступен для пользователя. Причем параметры графа не будут учитываться, поле "Текст новой задачи" следует самостоятельно описать условие задачи.</p>
+                    <p>При активном состоянии *. Данный тип задачи предлагает участнику с помощью выделения выбрать подграф в качестве ответа на задачу, причем разработанный при конструировании задачи граф будет доступен для пользователя. Автор задачи должен создать граф, выделить на нем подграф, для которого автоматичеки вычислятся характеристики. Выбранные целевые характеристик подграфа включатся в условие задачи.</p>
                 </div>
                 <p href="#" class="tooltip">Конструктор задач (?)<span><b>Характеристики</b><br>Характеристик заполняются при составлении графа. Можно заполнить вручную.</span></p>
                 <div class="task-lst">
@@ -219,16 +219,36 @@
                     </div>
                     <p href="#" class="tooltip">Подсказки (?)<span><b>Подсказки</b><br>Включение/скрытие подсказок для пользовтеля</span></p>
                     <form id="frm-statistic">
-                        <input type="checkbox" name="option1" class="value-for-task" id="pnt" value="a1">Количество вершин
-                        <input type="checkbox" name="option2" class="value-for-task" id="rbr" value="a2">Количество ребер
-                        <input type="checkbox" name="option3" class="value-for-task" id="cntc" value="a3">Количество компонент связности
-                        <input type="checkbox" name="option4" class="value-for-task" id="cclm" value="a4">Цикломатическое число
-                        <input type="checkbox" name="option5" class="value-for-task" id="doud" value="a5">Двудольность
-                        <input type="checkbox" name="option5" class="value-for-task" id="tr" value="a5">Дерево
-                        <input type="checkbox" name="option5" class="value-for-task" id="wdo" value="a5">Лес
-                        <input type="checkbox" name="option5" class="value-for-task" id="cyc" value="a5">Наличие циклов
-                        <input type="checkbox" name="option5" class="value-for-task" id="bicon" value="a5">Двусвязность
-                        <input type="checkbox" name="option5" class="value-for-task" id="regul" value="a5">Регулярность
+                        <div class="frm-wr">
+                            <input type="checkbox" name="option1" class="value-for-task" id="pnt" value="a1">Количество вершин
+                        </div>
+                        <div class="frm-wr">
+                            <input type="checkbox" name="option2" class="value-for-task" id="rbr" value="a2">Количество ребер
+                        </div>
+                        <div class="frm-wr">
+                            <input type="checkbox" name="option3" class="value-for-task" id="cntc" value="a3">Количество компонент связности
+                        </div>
+                        <div class="frm-wr">
+                            <input type="checkbox" name="option4" class="value-for-task" id="cclm" value="a4">Цикломатическое число
+                        </div>
+                        <div class="frm-wr">
+                            <input type="checkbox" name="option5" class="value-for-task" id="doud" value="a5">Двудольность
+                        </div>
+                        <div class="frm-wr">
+                            <input type="checkbox" name="option5" class="value-for-task" id="tr" value="a5">Дерево
+                        </div>
+                        <div class="frm-wr">
+                            <input type="checkbox" name="option5" class="value-for-task" id="wdo" value="a5">Лес
+                        </div>
+                        <div class="frm-wr">
+                            <input type="checkbox" name="option5" class="value-for-task" id="cyc" value="a5">Наличие циклов
+                        </div>
+                        <div class="frm-wr">
+                            <input type="checkbox" name="option5" class="value-for-task" id="bicon" value="a5">Двусвязность
+                        </div>
+                        <div class="frm-wr">
+                            <input type="checkbox" name="option5" class="value-for-task" id="regul" value="a5">Регулярность
+                        </div>
                     </form>
 
                 </div>
@@ -458,6 +478,11 @@ dfs(node, arrChecked){
                 <p></p>
                 <p></p>
                 <p></p>
+            </div>
+            <div class="all-solution-lst">
+                <h3>Все решения</h3>
+                <table>
+                </table>
             </div>
         </div>
 
