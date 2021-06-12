@@ -697,6 +697,16 @@ input[type="checkbox"]:disabled{
     background: rgb(238,238,238);
     border: 1px solid #ccc;
 }
+.error-load-module{
+
+}
+.success-load-module .message-ok{
+    color: #0bda51;
+}
+.error-load-module .message-error {
+    color: red;
+    font-size: 12px;
+}
 
 .selectstyle{
     height: 30px;

@@ -48,7 +48,7 @@ function includeToSubgraph(elem) {
             for(let k in subgraph.nodeHash){
                 if(key == k) return;
             }
-            console.log("SET");
+
             subgraph.nodeHash[key] = new Node(elem.name,
                 elem.x,
                 elem.y,
@@ -95,7 +95,7 @@ function includeToSubgraph(elem) {
                 subgraph.nodeHash[key2].roads[subgraph.nodeHash[key2].roads.length - 1].color =path.color;
                 subgraph.nodeHash[key2].roads[subgraph.nodeHash[key2].roads.length - 1].width =path.width;
                 subgraph.nodeHash[key2].roads[subgraph.nodeHash[key2].roads.length - 1].weight = path.weight;
-                console.log(subgraph);
+
                 history.update(subgraph.nodeHash, 2);
                 history.update(graph.nodeHash);
             }
@@ -137,7 +137,7 @@ function includeToSubgraph(elem) {
                 history.update(subgraph.nodeHash, 2);
                 history.update(graph.nodeHash);
                 //history.update(graph.nodeHash);
-                console.log(subgraph);
+
             }
             if(!flag1 && flag2){
                 let elem1 = graph.nodeHash[key1];
@@ -163,7 +163,7 @@ function includeToSubgraph(elem) {
                 subgraph.nodeHash[key2].roads[subgraph.nodeHash[key2].roads.length - 1].weight = path.weight;
                 history.update(subgraph.nodeHash, 2);
                 history.update(graph.nodeHash);
-                console.log(subgraph);
+
             }
             if(flag1 && !flag2){
                 let elem2 = graph.nodeHash[key2];
@@ -189,7 +189,7 @@ function includeToSubgraph(elem) {
                 subgraph.nodeHash[key2].roads[subgraph.nodeHash[key2].roads.length - 1].weight = path.weight;
                 history.update(subgraph.nodeHash, 2);
                 history.update(graph.nodeHash);
-                console.log(subgraph);
+
             }
             menuProperty.update("ALL", subgraph);
             /*graph.nodeHash[key].roads.push(new Path(roads[i].name,
@@ -226,8 +226,8 @@ function includeToSubgraph(elem) {
                     }
                 }
             }
-            console.log("DEL");
-            console.log(subgraph);
+
+
             menuProperty.update("ALL", subgraph);
             history.update(subgraph.nodeHash, 2);
             history.update(graph.nodeHash);
@@ -237,7 +237,7 @@ function includeToSubgraph(elem) {
             let key2 = graph.getKey(elem.xEnd, elem.yEnd);
             //-
             subgraph.deletePath(key1,key2);
-            console.log(subgraph);
+
             menuProperty.update("ALL", subgraph);
             history.update(subgraph.nodeHash, 2);
             history.update(graph.nodeHash);
@@ -248,7 +248,10 @@ function includeToSubgraph(elem) {
 function invert(value){
     return value == 1 ? 2 : 1;
 }
+//класс для хранения новой задачи
 class Task{
+    //задача имеет тип, id, текстовое описание, установленные действия мыши, подсказки,
+    // опции( целевые характеристик графа), цветовую палитру, стартовую точку в задаче,
     constructor(type, prps, hints) {
         this.type = type;
         this.id = (new Date()).toString().hashCode();
@@ -260,13 +263,14 @@ class Task{
         this.start = type == 2 ? graph.nodeHash : "";
         this.loadoption();
     }
+    //загрузка опций в зависимости от типа задачи
     loadoption(){
         let taskLst = document.querySelector(".task-lst");
         switch (this.type) {
             case 1:{
                 for(let i = 0;i<taskLst.children.length;i++){
                     if(taskLst.children[i].children[2].children[0].checked){
-                        console.log(taskLst.children[i].children[1]);
+
                         let key = taskLst.children[i].children[1].id;
                         let value = taskLst.children[i].children[1].value;
                         if(taskLst.children[i].children[1].type == "text")
@@ -331,7 +335,7 @@ class EmbededModule{
                         <div class="task-config">
                             <input type="checkbox">
                             <p href="#" class="tooltip">(?)<span><b>Действия</b><br>Включить данный параметр в задачу?</span></p>
-                        </div>`;console.log("here");break;
+                        </div>`;break;
                 case "integer":elemToParams.innerHTML = ` <label data-title="Числовой параметр" for="">${conf[i].name} (<i>число</i>)</label>
                         <input type="text" class="value-for-task" id="${conf[i].idHash}">
                         <div class="task-config">
@@ -344,7 +348,6 @@ class EmbededModule{
 
     }
     initfunc(modulesrc){
-        console.log("HERE");
         for(let i =0;i<modulesrc.length;i++) {
             let obj = {
 
@@ -355,6 +358,7 @@ class EmbededModule{
 
     }
 }
+//класс для общения с сервером
 class ServerConnector{
     constructor() {
         this.host = "http://localhost:8000/";
@@ -367,6 +371,7 @@ class ServerConnector{
         this.urlgetallsolution = "getallsolution";
         this.modul = [];
     }
+    //асинхронный запрос на получение решения пользователя по имени и id
     async getSolutionByNameId(name, id){
         let fetchResponse = await fetch(this.host + this.urlgetsolution + "?name=" + name + "&id=" + id, {
             method: 'GET',
@@ -375,6 +380,7 @@ class ServerConnector{
         let data = JSON.parse(txt);
         return data;
     }
+    //асинхронный запрос на получение всех решений пользователей
     async getAllSolution(){
         let fetchResponse = await fetch(this.host + this.urlgetallsolution, {
             method: 'GET',
@@ -383,14 +389,7 @@ class ServerConnector{
         let data = JSON.parse(txt);
         return data;
     }
-    /*async getRandomSolution(){
-        let fetchResponse = await fetch(this.host + this.urlgetsolution, {
-            method: 'GET',
-        });
-        let txt = await fetchResponse.text();
-        let data = JSON.parse(txt);
-        return data;
-    }*/
+    //асинхронный запрос на получение задачи для пользователя
     async gettask(){
         let fetchResponse = await fetch(this.host + this.urlgettask, {
             method: 'GET',
@@ -400,6 +399,7 @@ class ServerConnector{
         return data;
 
     }
+    //асинхронный запрос на загрузку новосозданной задачи
     async loadtask(data){
         let fetchResponse = await fetch(this.host + this.urlloadtask, {
             method: 'POST',
@@ -407,6 +407,7 @@ class ServerConnector{
         });
         await fetchResponse.text();
     }
+    //асинхронный запрос на загрузку решения задачи
     async loadsolution(data){
         let fetchResponse = await fetch(this.host + this.urlloadsolution, {
             method: 'POST',
@@ -415,6 +416,7 @@ class ServerConnector{
         let txt = await fetchResponse.text();
         return txt;
     }
+    //асинхронный запрос на загрузку сторонних модулей для графа
     async getmodules(){
         let fetchResponse = await fetch(this.host + this.urlgetmodules, {
             method: 'GET',
@@ -424,12 +426,8 @@ class ServerConnector{
         for(let i = 0;i<data.length;i++)
             this.modul.push(data[i]);
     }
-    run(){
-        //let fun = eval(this.modul);
-        //fun();
-    }
+    //асинхронный запрос на загрузку нового модуля в систему
     async loadmodule(data){
-        console.log(data);
         let fetchResponse = await fetch(this.host + this.urlsetmodules, {
             method: 'POST',
             body: data
@@ -478,25 +476,7 @@ function multiEdit(x, y, arrToAdd){
             //menuProperty.update("add");
         }
         else{
-            /*if(graph.getKey(node.x,node.y) != arrToAdd[arrToAdd.length - 2].key){
-                if(key1 != graph.getKey(node.x,node.y)){
-                    arrToAdd.push({x:node.x,y:node.y, key: graph.getKey(node.x,node.y)});
-                    graph.addPath(key1, graph.getKey(node.x,node.y));
-                    menuProperty.update("addPath");
-                    for(let i = 0;i<arrToAdd.length-1;i++){
-                        graph.nodeHash[arrToAdd[i].key].phantomX = null;
-                        graph.nodeHash[arrToAdd[i].key].phantomY = null;
-                    }
-                    console.log("++++++++++");
-                }
-                else{
-                    console.log("*****");
-                    clearData();
-                }
-               // clearData();
-            }*/
-            //graph.getKey(node.x,node.y)
-            //arrToAdd[arrToAdd.length - 1].key
+
             let flag = false;
             for(let i = 0;i<graph.nodeHash[key1].roads.length;i++){
                 if(graph.nodeHash[key1].roads[i].to == graph.getKey(node.x,node.y)){
@@ -630,27 +610,25 @@ function setPropertyPath(to, ins, value, func){
         history.update(graph.nodeHash);
 
 }
+//класс для хранения действия пользователя в текстовом виде
 class HistoryAction{
     constructor(){
         this.rootElem = document.querySelector(".history");
         this.counter = 1;
         //this.clear();
     }
+    //очищение истории
     clear(){
         while(this.rootElem.children.length > 0){
             this.rootElem.removeChild(this.rootElem.lastChild);
         }
         this.counter = 1;
     }
+    //установка сообщения для пользователя
     setMessage(message){
         historyText += message + "\n";
-        /*let node = document.createElement("div");
-        node.className = "history-elem";
-        let p = document.createElement("p");
-        p.innerText = message;
-        node.append(p);
-        this.rootElem.append(node);*/
     }
+    //метод фиксирования нового события на графе( добавление, снятие выделения, установка цвета и т.д.)
     update(action, param = null, obj = null){
         if(isConstruct) return;
         if(param == null){
@@ -684,6 +662,8 @@ class HistoryAction{
         this.counter++;
     }
 }
+
+//класс для хранения истории модификаций графа, с возможностью перемещения по истории
 class History{
     constructor() {
         this.backElem = document.querySelector(".back");
@@ -694,6 +674,7 @@ class History{
         this.index = 1;
         this.init();
     }
+    //установка последнего состояния истории графа
     setLastState(){
         if(this.state.length > 1) {
             graph.nodeHash = JSON.parse(this.state[this.index]);
@@ -716,6 +697,7 @@ class History{
         }
 
     }
+    //назначение обработчкиов действия на кнопки "вперед" и "назад"
     init(){
         this.statesubgraph.push(JSON.stringify({}));
         this.backElem.addEventListener("click", ()=>{
@@ -728,6 +710,7 @@ class History{
 
         });
     }
+    //метод сохранения текущего состояния графа, вызывается при каждом изменении графа
     update(nodeHash, mode = 1){
         if(mode == 1){
             this.state.push(JSON.stringify(nodeHash));
@@ -744,6 +727,7 @@ class History{
 
 
     }
+    //метод для очистки истории
     clear(){
         this.state = [];
         this.statesubgraph = [];
@@ -752,6 +736,7 @@ class History{
         this.state.push(JSON.stringify({}));
         this.statesubgraph.push(JSON.stringify({}));
     }
+    //метод для изменения текущего состояния графа на предыдущее, если таковое имеется
     back(){
         this.nextElem.disabled = false;
         graph.nodeHash = JSON.parse(this.state[--this.index]);
@@ -806,6 +791,7 @@ class History{
         }
 
     }
+    //метод для изменения текущего состояния графа на следующее, если таковое имеется
     next(){
         if(!(this.index + 1 > this.state.length  - 1)){
             graph.nodeHash = JSON.parse(this.state[++this.index]);
@@ -873,7 +859,6 @@ class Statistics{
         }
     }
     update(context){
-        console.log(context);
         this.statisticElem.children[0].children[0].innerText = context.getCountNodes();
         this.statisticElem.children[1].children[0].innerText = context.getCountPath();
         this.statisticElem.children[2].children[0].innerText = context.getConnectComponentCount();
@@ -1001,7 +986,6 @@ class MenuPropertyGraph{
                 historyAct.clear();
                 //statistics.setParam(prps);
                 ///statistics.toggle();
-                console.log(prps);
                 //false = tip1
                 //true = tip2
                 if(this.paElem.checked){
@@ -1017,7 +1001,6 @@ class MenuPropertyGraph{
                     }
                     let newTask = new Task(2, props, prps);
                     graph = new Graph();
-                    console.log(newTask);
                     serverloader.loadtask(newTask);
                 }
                 else{
@@ -1027,7 +1010,6 @@ class MenuPropertyGraph{
                     props.rightClickMouse = selectRight;
 
                     let newTask = new Task(1, props, prps);
-                    console.log(newTask);
                     serverloader.loadtask(newTask);
                     statistics.update(graph);
                 }
@@ -1055,22 +1037,12 @@ class MenuPropertyGraph{
         let j = 0;
         let len = wrapper.children.length;
         for(let i = len - embedmodule.funcStorage.length;i< wrapper.children.length;i++){
-            console.log(wrapper.children[i].children[1].checked);
             this.elemNewTaskText.innerHTML += wrapper.children[i].children[1].nextElementSibling.children[0].checked ? (wrapper.children[i].children[1].checked ? `<p>${serverloader.modul[j].name}</p>` : "") : "";
             j++;
         }
     }
 
     update(action, context){
-       /*switch (action) {
-           case "add":this.nodesElemCount.value = context.getCountNodes();break;
-           case "delete":this.nodesElemCount.value = context.getCountNodes();this.pathElemCount.value = context.getCountPath();break;
-           case "addPath":this.pathElemCount.value = context.getCountPath();break;
-           case "ALL":{
-               this.nodesElemCount.value = context.getCountNodes();
-               this.pathElemCount.value = context.getCountPath();
-           };break;
-       }*/
         this.nodesElemCount.value = context.getCountNodes();
         this.pathElemCount.value = context.getCountPath();
         this.connectElemCount.value = context.getConnectComponentCount();
@@ -1085,7 +1057,7 @@ class MenuPropertyGraph{
         let wrapper = document.querySelector(".task-lst");
         let j = 0;
         let len = wrapper.children.length;
-        console.log(embedmodule.funcStorage);
+
         for(let i = len - embedmodule.funcStorage.length;i< wrapper.children.length;i++){
             for(let key in embedmodule.funcStorage[j]){
                 if(wrapper.children[i].children[1].type == "checkbox")
@@ -1143,7 +1115,7 @@ class ContextMenu{
             let colorHEX= "#" + Number(Math.floor(Math.random()*65536)).toString(16);
             colorstoTask.push(colorHEX);
             newElem.children[0].addEventListener("change", ()=>{
-                console.log("BAM");
+
                 this.blocked = false;
                 this.setcolor.style.display = "none";
                 this.targetPoint.isSelected = false;
@@ -1165,22 +1137,7 @@ class ContextMenu{
                 this.setcolor.removeChild(this.setcolor.lastElementChild);
             }
         });
-        /*for(let i =0;i<this.elemsColor.length;i++){
-            this.elemsColor[i].addEventListener("change", ()=>{
-                console.log(this.elemsColor[i]);
-                this.blocked = false;
-                this.setcolor.style.display = "none";
-                this.targetPoint.isSelected = false;
-                if(this.targetPoint instanceof Path){
-                    setPropertyPath(this.targetPoint.to, this.targetPoint.in, colors[i], this.targetPoint.setColor);
-                }
-                else {
-                    this.targetPoint.setColor(colors[i]);
-                }
-                //this.targetPoint.setColor(colors[i]);
-               // this.targetPoint.color = colors[i];
-            })
-        }*/
+
         //поле ввода имени и значения
         this.setname.addEventListener("keydown", (e)=>{
             if(e.code == "Enter"){
@@ -1188,14 +1145,6 @@ class ContextMenu{
                     if(this.setname.value == "")
                         return;
                     else{
-                        /*this.targetPoint.setName(this.setname.value);
-                        this.setname.style.display = "none";
-                        this.targetPoint.isSelected = false;
-                        this.blocked = false;
-                        for(let key in graph.nodeHash){
-                            if(graph.nodeHash[key].name == this.setname.value)
-                                return;
-                        }*/
                         if(this.targetPoint instanceof Path){
                             setPropertyPath(this.targetPoint.to, this.targetPoint.in, this.setname.value, this.targetPoint.setName);
                         }
@@ -1325,7 +1274,7 @@ class ContextMenu{
         this.targetPoint = node;
 
         this.x = x + 75;
-        this.y = y + 55;
+        this.y = y + 25;
 
         this.blocked = true;
         this.elem.style.left = this.x + "px";
@@ -1357,21 +1306,6 @@ class Menu{
     }
     init(){
 
-        this.selectStylePath.addEventListener("change", ()=>{
-            let value = this.selectStylePath.value.split(",").map(item => +item);
-            if(!value.includes(NaN)){
-                graph.setAllStylePath(value);
-                globalConfig.stylePath = value;
-            }
-
-        });
-        this.selectPointGrow.addEventListener("change", ()=>{
-            let value = this.selectPointGrow.value;
-            if(!isNaN(value)) {
-                graph.setAllGrowPoints(value);
-                globalConfig.radius = value;
-            }
-        });
 
         this.elemAdd.addEventListener("click", ()=>{
             //мод добавления одной вершины
@@ -1465,7 +1399,6 @@ class CNV {
                                 (y > graph.nodeHash[key].roads[i].yStart && y < graph.nodeHash[key].roads[i].yEnd))
                         ) {
                             cursorIsHover = true;
-                            console.log("add");
                             pathHovered.push(graph.nodeHash[key].roads[i]);
                         }
                     }
@@ -1489,7 +1422,6 @@ class CNV {
         }
         document.addEventListener("keydown", (e)=>{
             if(e.code == "Enter"){
-                console.log("ENTER");
                 clearData();
             }
         });
@@ -1505,7 +1437,6 @@ class CNV {
                 if(e.which == 1) {
                     //режим создания задачи
                     if (menuLeft.mode == 1 && !menu.blocked) {
-                        console.log("here");
                         for (let key in graph.nodeHash) {
                             if (Math.abs(graph.nodeHash[key].x - x) <= graph.nodeHash[key].radius  &&
                                 Math.abs(graph.nodeHash[key].y - y) <= graph.nodeHash[key].radius) {
@@ -1575,23 +1506,7 @@ class CNV {
                                 //menuProperty.update("add");
                             }
                             else{
-                                /*if(graph.getKey(node.x,node.y) != arrToAdd[arrToAdd.length - 2].key){
-                                    if(key1 != graph.getKey(node.x,node.y)){
-                                        arrToAdd.push({x:node.x,y:node.y, key: graph.getKey(node.x,node.y)});
-                                        graph.addPath(key1, graph.getKey(node.x,node.y));
-                                        menuProperty.update("addPath");
-                                        for(let i = 0;i<arrToAdd.length-1;i++){
-                                            graph.nodeHash[arrToAdd[i].key].phantomX = null;
-                                            graph.nodeHash[arrToAdd[i].key].phantomY = null;
-                                        }
-                                        console.log("++++++++++");
-                                    }
-                                    else{
-                                        console.log("*****");
-                                        clearData();
-                                    }
-                                   // clearData();
-                                }*/
+
                                 //graph.getKey(node.x,node.y)
                                 //arrToAdd[arrToAdd.length - 1].key
                                 let flag = false;
@@ -1685,7 +1600,7 @@ class CNV {
                                 return;
                             }
                         }
-                        console.log(graph.nodeHash);
+
                         for (let key in graph.nodeHash) {
                             for(let i = 0;i<graph.nodeHash[key].roads.length;i++){
                                 if (Math.abs((x-graph.nodeHash[key].roads[i].xStart)/(graph.nodeHash[key].roads[i].xEnd - graph.nodeHash[key].roads[i].xStart) -
@@ -1741,117 +1656,15 @@ class CNV {
                 }
             }
             else{
-                console.log("HHHHH");
-                console.log(props.leftClickMouse, props.rightClickMouse);
+
+
                 if(e.which == 1){
                     if(props.leftClickMouse == "construct"){
                         let val = multiEdit(x, y, arrToAdd);
                         if(val){
                             clearData();
                         }
-                        /*let isFree = true;
-                        let node = null;
-                        for (let key in graph.nodeHash) {
-                            if (Math.abs(graph.nodeHash[key].x - x) <= graph.nodeHash[key].radius &&
-                                Math.abs(graph.nodeHash[key].y - y) <= graph.nodeHash[key].radius) {
-                                isFree = false;
-                                node = graph.nodeHash[key];
-                            }
-                        }
-                        if(arrToAdd.length < 1 && isFree) {
-                            graph.add(x, y);
-                            arrToAdd.push({x,y, key: graph.getKey(x,y)});
-                            menuProperty.update("add");
-                        }
-                        else if(arrToAdd.length < 1 && !isFree){
-                            arrToAdd.push({x:node.x,y:node.y, key: graph.getKey(node.x,node.y)});
-                        }
-                        else{
-                            let key1 = arrToAdd[arrToAdd.length - 1].key;
-                            if(isFree){
-                                graph.add(x, y);
-                                arrToAdd.push({x,y, key: graph.getKey(x,y)});
-                                graph.addPath(key1, graph.getKey(x,y));
-                                menuProperty.update("addPath");
-                                menuProperty.update("add");
-                            }
-                            else{
-                                if(graph.getKey(node.x,node.y) != arrToAdd[arrToAdd.length - 2].key){
-                                    if(key1 != graph.getKey(node.x,node.y)){
-                                        arrToAdd.push({x:node.x,y:node.y, key: graph.getKey(node.x,node.y)});
-                                        graph.addPath(key1, graph.getKey(node.x,node.y));
-                                        menuProperty.update("addPath");
-                                        for(let i = 0;i<arrToAdd.length-1;i++){
-                                            graph.nodeHash[arrToAdd[i].key].phantomX = null;
-                                            graph.nodeHash[arrToAdd[i].key].phantomY = null;
-                                        }
-                                        console.log("++++++++++");
-                                    }
-                                    else{
-                                        console.log("*****");
-                                        clearData();
-                                    }
-                                   // clearData();
-                                }
-                                //graph.getKey(node.x,node.y)
-                                //arrToAdd[arrToAdd.length - 1].key
-                                let flag = false;
-                                for(let i = 0;i<graph.nodeHash[key1].roads.length;i++){
-                                    if(graph.nodeHash[key1].roads[i].to == graph.getKey(node.x,node.y)){
-                                        flag = true;
-                                    }
-                                }
-                                if(key1 != graph.getKey(node.x,node.y) && !flag){
-                                    arrToAdd.push({x:node.x,y:node.y, key: graph.getKey(node.x,node.y)});
-                                    graph.addPath(key1, graph.getKey(node.x,node.y));
-                                    menuProperty.update("addPath");
-                                    for(let i = 0;i<arrToAdd.length-1;i++){
-                                        graph.nodeHash[arrToAdd[i].key].phantomX = null;
-                                        graph.nodeHash[arrToAdd[i].key].phantomY = null;
-                                    }
-                                }
-                                else{
-                                    clearData();
-                                }
-                            }
-                        }*/
-                        /*
-                        //addToCanvas(x,y,arrToPath);
-                        let flag = false;
-                        //проверка на нажатие
-                        for (let key in graph.nodeHash) {
-                            if (Math.abs(graph.nodeHash[key].x - x) <= graph.nodeHash[key].radius*2  &&
-                                Math.abs(graph.nodeHash[key].y - y) <= graph.nodeHash[key].radius*2) {
-                                flag = true;
-                            }
-                        }
-                        if(flag){
-                            for (let key in graph.nodeHash) {
-                                if (Math.abs(graph.nodeHash[key].x - x) <= graph.nodeHash[key].radius &&
-                                    Math.abs(graph.nodeHash[key].y - y) <= graph.nodeHash[key].radius) {
-                                    if(arrToPath.length < 2 && !arrToPath.includes(key)){
-                                        graph.nodeHash[key].isSelected = true;
-                                        arrToPath.push(key);
-                                    }
-                                }
-                            }
-                            if(arrToPath.length == 2){
-                                graph.addPath(arrToPath[0], arrToPath[1]);
-                                graph.nodeHash[arrToPath[0]].isSelected = false;
-                                graph.nodeHash[arrToPath[1]].isSelected = false;
-                                graph.nodeHash[arrToPath[0]].phantomX = null;
-                                graph.nodeHash[arrToPath[0]].phantomY = null;
-                                statistics.update();
-                                //menuProperty.update("addPath");
-                                arrToPath = [];
 
-                            }
-                        }
-                        else{
-                            graph.add(x, y);
-                            statistics.update();
-                        }
-                        */
 
                     }
                     if(props.leftClickMouse == "delete"){
@@ -1880,77 +1693,10 @@ class CNV {
 
 
             }
-            /*
-            //добавление вершины
-            if(e.which == 1){
-                //построение ребра, пока без класса для ребра
-                for(let key in graph.nodeHash){
-                    if(graph.nodeHash[key].isSelected && menu.mode == 4){
-                        for(let key2 in graph.nodeHash){
-                            if(Math.abs(graph.nodeHash[key2].x -x) <= graph.nodeHash[key2].radius &&
-                                Math.abs(graph.nodeHash[key2].y -y) <= graph.nodeHash[key2].radius){
-                                graph.addPath(key, key2);
-                                menuProperty.update("addPath");
-                                graph.nodeHash[key].isSelected = false;
-                                menu.blocked = false;
-                            }
-                        }
-                    }
-                    //удаление ребра(можно оптимизировать)
-                    if(graph.nodeHash[key].isSelected && menu.mode == 5){
-                        for(let key2 in graph.nodeHash){
-                            if(Math.abs(graph.nodeHash[key2].x -x) <= graph.nodeHash[key2].radius &&
-                                Math.abs(graph.nodeHash[key2].y -y) <= graph.nodeHash[key2].radius){
-                                graph.deletePath(key,key2);
-                                menuProperty.update("deletePath");
-                                graph.nodeHash[key].isSelected = false;
-                                menu.blocked = false;
-                            }
-                        }
-                    }
-                }
-                for(let key in graph.nodeHash){
-                    if(Math.abs(graph.nodeHash[key].x -x) <= graph.nodeHash[key].radius &&
-                        Math.abs(graph.nodeHash[key].y -y) <= graph.nodeHash[key].radius){
-                        isMove = true;
-                        targetMove = graph.nodeHash[key];
-                    }
-                }
-                //предотвращение постановки точки на тоже место или очень близко
-                for(let key in graph.nodeHash){
-                    if(Math.abs(graph.nodeHash[key].x -x) <= graph.nodeHash[key].radius+15 &&
-                        Math.abs(graph.nodeHash[key].y -y) <= graph.nodeHash[key].radius+15){
-                        return;
-                    }
-                }
-                //добавление новой вершины
-                graph.add(x,y);
-                menuProperty.update("add");
-            }
-            //вызов меню
-            if(e.which == 3){
-                //предотвращение запуска конфига на многих элементах
-                for(let key in graph.nodeHash){
-                    if(graph.nodeHash[key].isConfig){
-                        graph.nodeHash[key].isConfig = false;
-                    }
-                }
-                //переход в режим меню для элемента
-                for(let key in graph.nodeHash){
-                    if(Math.abs(graph.nodeHash[key].x -x) <= graph.nodeHash[key].radius &&
-                        Math.abs(graph.nodeHash[key].y -y) <= graph.nodeHash[key].radius){
 
-                        if(!menu.blocked) {
-                            graph.nodeHash[key].isConfig = true;
-                            menu.show(graph.nodeHash[key]);
-
-                        }
-                    }
-                }
-
-            }*/
         });
         this.cnv.addEventListener("mouseup", () => {
+            menuProperty.update("ALL", graph);
             isMove = false;
             if(targetMove) {
                 targetMove.isSelected = false;
@@ -2016,9 +1762,10 @@ class CNV {
     }
 }
 
-/*
+
+//формуляр графа, хранящий вершины и ребра
 class Graph{
-    //добавить методы удаления, добавления путей
+
     constructor(){
         this.nodeHash = {};
         this.cnt = 0;
@@ -2026,9 +1773,8 @@ class Graph{
         this.isDicotyleds = false;
         this.allActive = true;
 
-
-
     }
+    //метод добавления вершины, обноволение истории
     add(x,y,name =""){
         let hash = this.cnt.toString().hashCode();
         this.nodeHash[this.cnt] = new Node(name, x, y, hash);
@@ -2036,6 +1782,7 @@ class Graph{
         historyAct.update("addNode", null, this.nodeHash[this.cnt]);
         this.cnt++;
     }
+    //метод получения количества ребер
     getCountPath(){
         let path = [];
         let checkedNode = [];
@@ -2048,333 +1795,7 @@ class Graph{
         }
         return path.length;
     }
-    isCycle(){
-        let checkedNode = [];
-        this.isCycled = false;
-        for(let key in this.nodeHash){
-            if(!checkedNode.includes(this.nodeHash[key])){
-              this.dfs2(this.nodeHash[key], checkedNode, null)
-            }
-        }
-        return this.isCycled;
-
-
-    }
-    isWood(){
-        return this.getConnectComponentCount() > 1 && !this.isCycle();
-    }
-    isRegular(){
-        let arr = [];
-        for(let key in this.nodeHash){
-            arr.push(this.nodeHash[key].roads.length);
-        }
-        console.log(arr);
-        let curr = arr[0];
-        let result = arr.find(item => item != curr);
-        return result == undefined;
-    }
-    isDicotyledonous(){
-        this.isDicotyleds = true;
-        let checkendNode = [];
-        for(let key in this.nodeHash){
-            if(!checkendNode.includes(key)) {
-                checkendNode.push(key);
-                this.dfs3(this.nodeHash[key], 1, checkendNode);
-            }
-        }
-        for(let key in this.nodeHash)
-            this.nodeHash[key]._color = null;
-        if(this.getConnectComponentCount() != 1){
-            console.log("FF");
-            return false;
-        }
-
-        return this.isDicotyleds;
-    }
-    dfs3(node, color, checkendNode){
-        node._color = color;
-        for(let i = 0;i<node.roads.length;i++){
-            let key = node.roads[i].to;
-            if(!checkendNode.includes(key)){
-                checkendNode.push(key);
-                this.dfs3(this.nodeHash[key], invert(color), checkendNode);
-            }
-            if(this.nodeHash[key]._color == color){
-                this.isDicotyleds = false;
-                return false;
-            }
-        }
-    }
-    dfsToBi(key, arrChecked, graphBi){
-        arrChecked.push(key);
-        for(let i = 0;i<graphBi[key].roads.length;i++){
-            let keym = graphBi[key].roads[i].to;
-            if(!arrChecked.includes(keym)){
-                this.dfsToBi(keym, arrChecked, graphBi);
-            }
-        }
-    }
-    isBiconnected(){
-        let graphCurrent = JSON.parse(JSON.stringify(this.nodeHash));
-        let keys = [];
-        for(let key in graphCurrent)
-            keys.push(key);
-        for(let i = 0;i<keys.length;i++){
-            graphCurrent = JSON.parse(JSON.stringify(this.nodeHash));
-            let point = JSON.parse(JSON.stringify(graphCurrent[keys[i]]));
-            delete graphCurrent[keys[i]];
-            for(let key in graphCurrent){
-                for(let j =0;j<graphCurrent[key].roads.length;j++){
-                    if(graphCurrent[key].roads[j].to == keys[i]){
-                        graphCurrent[key].roads.splice(j,1);
-                    }
-                }
-            }
-
-            let checkedNode = [];
-            let count = 0;
-            for(let key in graphCurrent){
-                if(!checkedNode.includes(key)) {
-                    this.dfsToBi(key, checkedNode, graphCurrent);
-                    count++;
-                }
-            }
-            if(count > 1)
-                return false;
-
-        }
-        return true;
-    }
-    isTree(){
-        return !this.isCycle() && ((this.getCountNodes() - this.getCountPath()) == 1);
-    }
-    getKey(x,y){
-        for(let key in this.nodeHash){
-            if(this.nodeHash[key].x == x && this.nodeHash[key].y == y){
-                return key;
-            }
-        }
-        return null;
-    }
-    dfs2(node, arrChecked, p){
-        arrChecked.push(node);
-        for(let i = 0;i<node.roads.length;i++){
-            let key = node.roads[i].to;
-            if(!arrChecked.includes(this.nodeHash[key])){
-                this.dfs2(this.nodeHash[key], arrChecked, node);
-            }
-            else if(this.nodeHash[key] != p){
-                this.isCycled = true;
-            }
-        }
-    }
-    getCyclomaticNumber(){
-        return this.getCountPath() -this.getCountNodes() + this.getConnectComponentCount();
-    }
-    getCountNodes(){
-        let count = 0;
-        for(let key in this.nodeHash){
-            count++;
-        }
-        return count;
-    }
-    getConnectComponentCount(){
-        let checkedNode = [];
-        let count = 0;
-        for(let key in this.nodeHash){
-            if(!checkedNode.includes(this.nodeHash[key])) {
-                this.dfs(this.nodeHash[key], checkedNode);
-                count++;
-            }
-        }
-        return count;
-    }
-    dfs(node, arrChecked){
-        arrChecked.push(node);
-        for(let i = 0;i<node.roads.length;i++){
-            let key = node.roads[i].to;
-            if(!arrChecked.includes(this.nodeHash[key])){
-                this.dfs(this.nodeHash[key], arrChecked);
-            }
-        }
-    }
-    deleteNode(node){
-        let keyDelete = null;
-        for(let key in this.nodeHash){
-            if(node == this.nodeHash[key]){
-                historyAct.update("deleteNode", null, this.nodeHash[key]);
-                keyDelete = key;
-                delete this.nodeHash[key];
-            }
-        }
-        //удаление путей
-        for(let key in this.nodeHash){
-            for(let i = 0;i<this.nodeHash[key].roads.length;i++){
-                if(this.nodeHash[key].roads[i].to == keyDelete){
-                    this.nodeHash[key].roads.splice(i, 1);
-                }
-            }
-        }
-        history.update(this.nodeHash);
-
-    }
-    addPath(key, key2){
-        let hash = (key + key2).toString().hashCode();
-        let path1 = new Path("",key, key2, hash,  graph.nodeHash[key].x,  graph.nodeHash[key].y, graph.nodeHash[key2].x,  graph.nodeHash[key2].y, 1, globalConfig.stylePath, null);
-        let path2 = new Path("",key2, key, hash, graph.nodeHash[key2].x,  graph.nodeHash[key2].y, graph.nodeHash[key].x,  graph.nodeHash[key].y, 1, globalConfig.stylePath, null);
-        graph.nodeHash[key].roads.push(path1);
-        graph.nodeHash[key2].roads.push(path2);
-        history.update(this.nodeHash);
-        historyAct.update("addPath", null, path1);
-    }
-    deletePath(key, key2){
-        for(let i = 0;i<graph.nodeHash[key].roads.length;i++){
-            if(graph.nodeHash[key].roads[i].to == key2){
-                historyAct.update("deletePath", null, graph.nodeHash[key].roads[i]);
-                graph.nodeHash[key].roads.splice(i, 1);
-            }
-        }
-        for(let i = 0;i<graph.nodeHash[key2].roads.length;i++){
-            if(graph.nodeHash[key2].roads[i].to == key){
-                graph.nodeHash[key2].roads.splice(i, 1);
-            }
-        }
-        history.update(this.nodeHash);
-    }
-    showGraph(){
-        cnv.clear();
-        cnv.ctx.shadowColor="rgba(255, 0, 0, 1)";
-        cnv.ctx.shadowBlur = 0;
-        cnv.ctx.strokeStyle = "black";
-        for(let key in this.nodeHash){
-            let point = this.nodeHash[key];
-            if(point.phantomX != null && point.phantomY != null){
-                console.log("PHANTOM");
-                cnv.ctx.beginPath();
-                cnv.ctx.moveTo(point.x, point.y);
-                cnv.ctx.lineTo(point.phantomX, point.phantomY);
-                cnv.ctx.stroke();
-                cnv.ctx.closePath();
-            }
-        }
-        let checked = [];
-        for(let key in this.nodeHash){
-            for(let i =0;i<this.nodeHash[key].roads.length;i++){
-                //if(!checked.includes(this.nodeHash[key].roads[i].to)) {
-                    let toKey = this.nodeHash[key].roads[i].to;
-                    cnv.ctx.globalAlpha = this.nodeHash[key].roads[i].isActive ? 1 : 0.2;
-                    cnv.ctx.beginPath();
-                    cnv.ctx.strokeStyle = this.nodeHash[key].roads[i].color;
-                    cnv.ctx.setLineDash(this.nodeHash[key].roads[i].stylePath);
-                    cnv.ctx.lineWidth = this.nodeHash[key].roads[i].width;
-                    cnv.ctx.shadowBlur = this.nodeHash[key].roads[i].isSelected ? 10 : 0;
-                    cnv.ctx.moveTo(this.nodeHash[key].x, this.nodeHash[key].y);
-                    cnv.ctx.lineTo(this.nodeHash[toKey].x, this.nodeHash[toKey].y);
-                    cnv.ctx.stroke();
-                    cnv.ctx.closePath();
-                    //checked.push(this.nodeHash[key].roads[i].in);
-                //}
-            }
-        }
-        cnv.ctx.globalAlpha = 1;
-        //вывод имен путей
-        checked = [];
-        for(let key in this.nodeHash){
-            for(let i =0;i<this.nodeHash[key].roads.length;i++){
-                //if(!checked.includes(this.nodeHash[key].roads[i].to)) {
-                    let x = (this.nodeHash[key].roads[i].xStart + this.nodeHash[key].roads[i].xEnd) / 2,
-                        y = (this.nodeHash[key].roads[i].yStart + this.nodeHash[key].roads[i].yEnd) / 2;
-                    cnv.ctx.fillStyle = "black";
-                    cnv.ctx.font = "20 Arial";
-                    if (this.nodeHash[key].roads[i].weight)
-                        cnv.ctx.fillText(this.nodeHash[key].roads[i].name + " (" + this.nodeHash[key].roads[i].weight + ")", x, y - 15);
-                    else
-                        cnv.ctx.fillText(this.nodeHash[key].roads[i].name, x, y - 15);
-                    //checked.push(this.nodeHash[key].roads[i].in);
-                //}
-            }
-
-        }
-        //вывод имен
-        for(let key in this.nodeHash){
-            cnv.ctx.fillStyle = "black";
-            cnv.ctx.font = "20 Arial";
-            if(this.nodeHash[key].weight)
-                cnv.ctx.fillText(this.nodeHash[key].name + " (" + this.nodeHash[key].weight + ")",this.nodeHash[key].x, this.nodeHash[key].y-this.nodeHash[key].radius*2);
-            else
-                cnv.ctx.fillText(this.nodeHash[key].name,this.nodeHash[key].x, this.nodeHash[key].y-this.nodeHash[key].radius*2);
-        }
-        //вывод вершин
-        for(let key in this.nodeHash){
-            cnv.ctx.fillStyle = this.nodeHash[key].color || "red";
-            cnv.ctx.globalAlpha = this.nodeHash[key].isActive ? 1 : 0.2;
-            cnv.ctx.beginPath();
-            //cnv.ctx.shadowBlur= this.nodeHash[key].isSelected ? 10 : 0;
-            cnv.ctx.arc(this.nodeHash[key].x, this.nodeHash[key].y,this.nodeHash[key].radius, 0 , 2*Math.PI);
-            cnv.ctx.fill();
-            cnv.ctx.closePath();
-            cnv.ctx.strokeStyle = "red";
-            cnv.ctx.beginPath();
-            if(this.nodeHash[key].isSelected)
-                cnv.ctx.arc(this.nodeHash[key].x, this.nodeHash[key].y,this.nodeHash[key].radius+2, 0 , 2*Math.PI);
-            cnv.ctx.stroke();
-        }
-        cnv.ctx.globalAlpha = 1;
-
-    }
-    setAllGrowPoints(value){
-        for(let key in this.nodeHash){
-           this.nodeHash[key].setGrow(value);
-        }
-    }
-    setAllStylePath(value){
-        for(let key in this.nodeHash){
-            for(let i = 0;i<this.nodeHash[key].roads.length;i++){
-                this.nodeHash[key].roads[i].setStyle(value);
-            }
-        }
-    }
-    allSetActive(){
-        this.allActive = !this.allActive;
-        for(let key in this.nodeHash){
-            this.nodeHash[key].isActive = this.allActive;
-            for(let i = 0;i<this.nodeHash[key].roads.length;i++){
-                this.nodeHash[key].roads[i].isActive = this.allActive;
-            }
-        }
-        history.update(this.nodeHash);
-    }
-}
- */
-class Graph{
-    //добавить методы удаления, добавления путей
-    constructor(){
-        this.nodeHash = {};
-        this.cnt = 0;
-        this.isCycled = false;
-        this.isDicotyleds = false;
-        this.allActive = true;
-
-    }
-    add(x,y,name =""){
-        let hash = this.cnt.toString().hashCode();
-        this.nodeHash[this.cnt] = new Node(name, x, y, hash);
-        history.update(this.nodeHash);
-        historyAct.update("addNode", null, this.nodeHash[this.cnt]);
-        this.cnt++;
-    }
-    getCountPath(){
-        let path = [];
-        let checkedNode = [];
-        for(let key in this.nodeHash){
-            for(let i =0;i<this.nodeHash[key].roads.length;i++){
-                if(!checkedNode.includes(this.nodeHash[key].roads[i].to))
-                    path.push(this.nodeHash[key].roads[i].to);
-            }
-            checkedNode.push(key);
-        }
-        return path.length;
-    }
+    //метод определения наличия циклов
     isCycle(){
         let checkedNode = [];
         this.isCycled = false;
@@ -2387,19 +1808,21 @@ class Graph{
 
 
     }
+    //метод определения является ли граф лесом
     isWood(){
         return this.getConnectComponentCount() > 1 && !this.isCycle();
     }
+    //метод определения является ли граф регулярным
     isRegular(){
         let arr = [];
         for(let key in this.nodeHash){
             arr.push(this.nodeHash[key].roads.length);
         }
-        console.log(arr);
         let curr = arr[0];
         let result = arr.find(item => item != curr);
         return result == undefined;
     }
+    //метод определения является ли граф двудольным
     isDicotyledonous(){
         this.isDicotyleds = true;
         let checkendNode = [];
@@ -2412,12 +1835,12 @@ class Graph{
         for(let key in this.nodeHash)
             this.nodeHash[key]._color = null;
         if(this.getConnectComponentCount() != 1){
-            console.log("FF");
             return false;
         }
 
         return this.isDicotyleds;
     }
+    //обход в глубину
     dfs3(node, color, checkendNode){
         node._color = color;
         for(let i = 0;i<node.roads.length;i++){
@@ -2432,6 +1855,7 @@ class Graph{
             }
         }
     }
+    //обход в глубину
     dfsToBi(key, arrChecked, graphBi){
         arrChecked.push(key);
         for(let i = 0;i<graphBi[key].roads.length;i++){
@@ -2441,6 +1865,7 @@ class Graph{
             }
         }
     }
+    //метод определения является ли граф двусвязным
     isBiconnected(){
         let graphCurrent = JSON.parse(JSON.stringify(this.nodeHash));
         let keys = [];
@@ -2472,9 +1897,11 @@ class Graph{
         }
         return true;
     }
+    //метод определения является ли граф деревом
     isTree(){
         return !this.isCycle() && ((this.getCountNodes() - this.getCountPath()) == 1);
     }
+    //метод получения ключа вершины по координатам x,y
     getKey(x,y){
         for(let key in this.nodeHash){
             if(this.nodeHash[key].x == x && this.nodeHash[key].y == y){
@@ -2483,6 +1910,7 @@ class Graph{
         }
         return null;
     }
+    //обход в глубину
     dfs2(node, arrChecked, p){
         arrChecked.push(node);
         for(let i = 0;i<node.roads.length;i++){
@@ -2495,9 +1923,11 @@ class Graph{
             }
         }
     }
+    //метод получения цикломатического числа
     getCyclomaticNumber(){
         return this.getCountPath() -this.getCountNodes() + this.getConnectComponentCount();
     }
+    //метод получения количества вершин
     getCountNodes(){
         let count = 0;
         for(let key in this.nodeHash){
@@ -2505,6 +1935,7 @@ class Graph{
         }
         return count;
     }
+    //метод получения количества компонент связности
     getConnectComponentCount(){
         let checkedNode = [];
         let count = 0;
@@ -2516,6 +1947,7 @@ class Graph{
         }
         return count;
     }
+    //обход в ширину
     dfs(node, arrChecked){
         arrChecked.push(node);
         for(let i = 0;i<node.roads.length;i++){
@@ -2525,6 +1957,7 @@ class Graph{
             }
         }
     }
+    //метод удаления вершины и все его ребер(если они есть)
     deleteNode(node){
         let keyDelete = null;
         for(let key in this.nodeHash){
@@ -2546,6 +1979,7 @@ class Graph{
             history.update(this.nodeHash);
 
     }
+    //метод добавления ребра между двумя вершинами по ключам
     addPath(key, key2){
         let hash = (key + key2).toString().hashCode();
         let path1 = new Path("",key, key2, hash,  this.nodeHash[key].x,  this.nodeHash[key].y, this.nodeHash[key2].x,  this.nodeHash[key2].y, 1, globalConfig.stylePath, null);
@@ -2556,6 +1990,7 @@ class Graph{
             history.update(this.nodeHash);
         historyAct.update("addPath", null, path1);
     }
+    //метод удаления ребра между двумя вершинами по ключам
     deletePath(key, key2){
         if(this.nodeHash[key]){
             for(let i = 0;i<this.nodeHash[key].roads.length;i++){
@@ -2575,6 +2010,7 @@ class Graph{
         if(typeTask == 1)
             history.update(this.nodeHash);
     }
+    //отрисовка графа на canvas
     showGraph(){
         cnv.clear();
         cnv.ctx.shadowColor="rgba(255, 0, 0, 1)";
@@ -2583,7 +2019,6 @@ class Graph{
         for(let key in this.nodeHash){
             let point = this.nodeHash[key];
             if(point.phantomX != null && point.phantomY != null){
-                console.log("PHANTOM");
                 cnv.ctx.beginPath();
                 cnv.ctx.moveTo(point.x, point.y);
                 cnv.ctx.lineTo(point.phantomX, point.phantomY);
@@ -2656,11 +2091,13 @@ class Graph{
         cnv.ctx.globalAlpha = 1;
 
     }
+    //установка размера вершин
     setAllGrowPoints(value){
         for(let key in this.nodeHash){
             this.nodeHash[key].setGrow(value);
         }
     }
+    //установка стилей для ребер
     setAllStylePath(value){
         for(let key in this.nodeHash){
             for(let i = 0;i<this.nodeHash[key].roads.length;i++){
@@ -2668,6 +2105,7 @@ class Graph{
             }
         }
     }
+    //установка/снятие выделения для всего графа
     allSetActive(){
         this.allActive = !this.allActive;
         for(let key in this.nodeHash){
@@ -2679,6 +2117,7 @@ class Graph{
         history.update(this.nodeHash);
     }
 }
+//класс вершин графа
 class Node{
     constructor(name,x,y, hash ,radius = globalConfig.radius, color = "blue", weight = null, active = true){
         this.name = name;
@@ -2695,33 +2134,39 @@ class Node{
         this.roads = [];
         this.hashCode = hash;
     }
+    //установка цвета для вершины, обновление истории
     setColor(color){
         this.color = color;
         history.update(graph.nodeHash);
         historyAct.update("setColor", color, this);
     }
+    //установка имени для вершины, обновление истории
     setName(name){
         this.name = name;
         history.update(graph.nodeHash);
         historyAct.update("setName", name, this);
     }
+    //установка размера для вершины, обновление истории
     setGrow(value){
         this.radius = value;
         history.update(graph.nodeHash);
         historyAct.update("setGrow", value, this);
     }
+    //установка/снятие выделения для вершины, обновление истории
     setActive(){
         this.isActive = !this.isActive;
         if(typeTask == 1)
             history.update(graph.nodeHash);
         historyAct.update("setActive", this.isActive, this);
     }
+    //установка веса для вершины, обновление истории
     setWeight(value){
         this.weight = value;
         history.update(graph.nodeHash);
         historyAct.update("setWeight", value, this);
     }
 }
+//класс ребра графа
 class Path{
     constructor(name,namein,nameto,hash,x1,y1,x2,y2,width,stylePath = [0],weight = null,color ="black",select = false, active = true) {
         this.to = nameto;
@@ -2741,29 +2186,30 @@ class Path{
         this._color = null;
         this.hashCode = hash;
     }
+    //установка цвета для ребра, обновление истории
     setColor(color){
         this.color = color;
         historyAct.update("setColor", color, this);
         //history.update(graph.nodeHash);
     }
+    //установка толщины отрисовки для ребра, обновление истории
     setGrow(value){
         this.width = value;
         historyAct.update("setGrow", value, this);
         //history.update(graph.nodeHash);
     }
+    //установка имени для ребра, обновление истории
     setName(name){
         this.name = name;
         historyAct.update("setName", name, this);
         //history.update(graph.nodeHash);
     }
+    //установка/снятие выделения для ребра, обновление истории
     setActive(){
         this.isActive = !this.isActive;
         historyAct.update("setActive", this.isActive, this);
     }
-    setStyle(value){
-        this.stylePath = value;
-        //history.update(graph.nodeHash);
-    }
+    //установка веса для ребра, обновление истории
     setWeight(value){
         this.weight = value;
         historyAct.update("setWeight", value, this);
@@ -2789,7 +2235,6 @@ window.addEventListener("load",async ()=>{
     history.update(graph.nodeHash);
     requestAnimationFrame(loop);
     initElems();
-    console.log(serverloader.modul);
 });
 window.addEventListener("scroll", ()=>{
     if(cnv)
@@ -2798,7 +2243,6 @@ window.addEventListener("scroll", ()=>{
 let taskOption;
 async function preGetTask(elemHTMLTask) {
     taskOption = await serverloader.gettask();
-    console.log(taskOption);
     elemHTMLTask.children[0].innerText = `Задача #${taskOption["id"]}`;
     elemHTMLTask.children[1].innerText = `${taskOption["description"]}`;
     historyText = "";
@@ -2933,22 +2377,7 @@ function initElems(){
         programmShow.style.display = "none";
         apiShow.style.display = "none";
         let result = await  serverloader.getAllSolution();
-        /*
-        let result = await serverloader.getRandomSolution();
-        history.clear();
-        for(let i = 1;i<result["history"].length;i++){
-            let stateJSON = JSON.parse(result["history"][i]);
-            history.update(stateJSON);
-        }
-        history.setLastState();
-        solutionShow.children[1].innerHTML = `Задача: #${result["id"]}`;
-        solutionShow.children[2].innerHTML = `Участник: ${result["name"]}`;
-        solutionShow.children[3].innerHTML = `Лог: ${result["historyText"]}`;
-        console.log(result);
-        isConstruct = false;
-        isDemonstration = true;
-        statistics.clear();
-        statistics.toggle();*/
+
         let str = ``;
         solutionTable.innerHTML = "";
         for(let key in result){
@@ -2981,7 +2410,6 @@ function initElems(){
             area.value = text;
         if(!flag_area){
             let currentText = document.querySelector("#text-area");
-            console.log(currentText.value);
             let arrText = currentText.value.split("\n");
             textTaskElem.innerHTML = "";
             for(let i  =0;i<arrText.length;i++){
@@ -2989,10 +2417,13 @@ function initElems(){
             }
         }
     });
-
+    let errorBlock = document.querySelector(".error-load-module");
+    let okBlock = document.querySelector(".success-load-module");
     let loadModuleElem = document.querySelector("#loadmodule");
     loadModuleElem.addEventListener("click", async (e)=>{
         e.preventDefault();
+        errorBlock.innerHTML = "";
+        okBlock.innerHTML = "";
         let usedFunctionName = [];
         let scriptBody = {};
         for(let i = 0;i<serverloader.modul.length;i++){
@@ -3020,7 +2451,6 @@ function initElems(){
 
                 let regexp = /graph=|graph =|globalConfig|props|serverloader|embedmodule|isConstruct|menuLeft|cnv|menu|menuProperty|history|statistics|colors|globalConfig|graph\.nodeHash\[[a-z][a-z0-9]*] =|graph\.nodeHash\[[a-z][a-z0-9]*]=/;
                 if(!jsonmodule["script"].match(regexp) && (jsonmodule["type"] == "boolean" || jsonmodule["type"] == "integer") && !usedFunctionName.includes(jsonmodule["script"].substring(index2+1, index))){
-                    console.log("Load");
                     let scr = "";
                     scr += jsonmodule["script"].substring(0, index+1);
 
@@ -3030,12 +2460,10 @@ function initElems(){
                             let foundPos = jsonmodule["script"].indexOf(key, pos);
                             if (foundPos == -1) break;
                             pos = foundPos + 1;
-                            console.log(scriptBody[key]);
                             scr+=scriptBody[key];
                         }
                     }
                     scr += jsonmodule["script"].substring(index+1);
-                    console.log(scr);
 
                     jsonmodule["script"] = scr;
                     jsonmodule['nameFunction'] = jsonmodule["script"].substring(index2+1, index);
@@ -3043,9 +2471,38 @@ function initElems(){
                     jsonmodule["verif"] = "ok";
 
                     await serverloader.loadmodule(JSON.stringify(jsonmodule));
+                    let newOk = document.createElement("p");
+                    newOk.className = "message-ok";
+                    newOk.innerHTML = "Модуль успешно загружен";
+                    errorBlock.append(newOk);
                 }
                 else{
-                    console.log("no load");
+                    if(usedFunctionName.includes(jsonmodule["script"].substring(index2+1, index))){
+                        let newError = document.createElement("p");
+                        newError.className = "message-error";
+                        newError.innerHTML = `Данное название функции ${jsonmodule["script"].substring(index2+1, index)} уже есть в системе, поменяйте название.`;
+                        errorBlock.append(newError);
+                    }
+                    if(jsonmodule["script"].match(regexp)){
+                        let newError = document.createElement("p");
+                        newError.className = "message-error";
+                        newError.innerHTML = `Использованы запрещенные конструкции и/или изменение глобальных объектов`;
+                        errorBlock.append(newError);
+                    }
+                    if(!(jsonmodule["name"] && jsonmodule["type"] && jsonmodule["desc"] && jsonmodule["script"])){
+                        let newError = document.createElement("p");
+                        newError.className = "message-error";
+                        newError.innerHTML = `В файле модуля отсутствует одно или несколько обязательных полей.`;
+                        errorBlock.append(newError);
+                    }
+                    if(!(jsonmodule["type"] == "boolean" || jsonmodule["type"] == "integer")){
+                        let newError = document.createElement("p");
+                        newError.className = "message-error";
+                        newError.innerHTML = `Поле type должно содержать одно из значений: boolean, integer`;
+                        errorBlock.append(newError);
+                    }
+
+
                 }
             }
 
@@ -3086,8 +2543,6 @@ function initElems(){
         outData["history"] = state;
         outData["name"] = studentInfo.value;
         let response = await serverloader.loadsolution(outData);
-        console.log(outData);
-        console.log(response);
         if(response == "success"){
             resultBlock.className = "status-response status-response-ok";
             resultBlock.innerText = "Решение верно";
@@ -3114,12 +2569,10 @@ async function getThisSolution(target){
     solutionShow.children[1].innerHTML = `Задача: #${result["id"]}`;
     solutionShow.children[2].innerHTML = `Участник: ${result["name"]}`;
     solutionShow.children[3].innerHTML = `Лог: ${result["historyText"]}`;
-    console.log(result);
     isConstruct = false;
     isDemonstration = true;
     statistics.clear();
     statistics.toggle();
-    console.log(target);
 }
 function loop(){
     graph.showGraph();

@@ -23,7 +23,7 @@
     </div>
     <div class="main">
         <div class="cnv-blck">
-            <div class="params-graph">
+            <!--<div class="params-graph">
                 <select id="point-grow" class="selectstyle" size="1">
                     <option value="title">Размер вершин</option>
                     <option value="5">Малый</option>
@@ -36,7 +36,7 @@
                     <option value="5, 15">Пунткир</option>
                     <option value="1,2">Точечная</option>
                 </select>
-            </div>
+            </div>-->
             <div class="cnv-wrap">
                 <div class="button-menu">
                     <input type="button" class="btn-menu btn-menu-active add" value="">
@@ -130,14 +130,7 @@
                         </div>
                     </div>
 
-                    <div class="val">
-                        <label data-title="Числовой параметр" for="">Плоский</label>
-                        <input type="checkbox" id="plsk" class="value-for-task">
-                        <div class="task-config">
-                            <input type="checkbox">
-                            <p href="#" class="tooltip">(?)<span><b>Действия</b><br>Включить данный параметр в задачу?</span></p>
-                        </div>
-                    </div>
+
                     <div class="val">
                         <label data-title="Числовой параметр" for="">Двудольный</label>
                         <input id="dicotyledonous" type="checkbox" class="value-for-task">
@@ -351,14 +344,17 @@ dfs(node, arrChecked){
 </pre>
                 <p>Файл конфигурации содержит 4 обязательных поля. Поле name отвечает за смысловую нагрузки данного модуля и встраивается как элемент в конструктор задач. Поле desc содержит описание модуля, которое необходимо для API. Поле type может содержть 2 возможных значения "boolean", "integer", данное поле определяет тип элемента в конструкторе задач. Поле script содержит функцию на языке js, причем имя функции модуля не должно повторяться с уже новосозданными модулями и внутренними метода графа. Также данная функция должна быть обернута в (), т.е (function name(){}). Внутри функции Вы можете использовать глобальные объекты subgraph, graph и их методы, например graph.isRegular() - вернет является ли данный граф регулярным. Весь список функций можно посмотреть в разделе API. Сторонние модули вызываются как обычные функции, т.е если до Вас был написан модуль например (function a(){let cnt = graph.getCountNodes(); let rbr = graph.getCountPath(); let val = graph.isTree(); return (cnt - rbr == 1) && !val;}), то и использовать его можно в вашем модуле просто вызвав как обычную функцию. Например модуль (function b(){let cnt = graph.getCountNodes(); let val = a(); return val && cnt;}). Здесь используется сторонний модуль модуль a() - написанный другим пользователем.</p>
                 <h3>Загрузка модуля</h3>
-                <form id="upload-container">че
+                <form id="upload-container">
                     <div>
                         <p>Модуль</p>
                         <input id="file-input-module" type="file" name="file">
                     </div>
                     <input id="loadmodule" type="submit">
                 </form>
-                <p></p>
+                <div class="error-load-module">
+                </div>
+                <div class="success-load-module">
+                </div>
             </div>
             <div class="actions hiden">
                 <h3>Справка</h3>
@@ -432,11 +428,11 @@ dfs(node, arrChecked){
                     </div>
                     <div class="type-modul">
                         <div class="norm"></div>
-                        <span>Нестабильный модуль</span>
+                        <span>Непроверенный модуль</span>
                     </div>
                     <div class="type-modul">
                         <div class="bad"></div>
-                        <span>Непроверенный модуль</span>
+                        <span>Нестабильный модуль</span>
                     </div>
                 </div>
                 <div class="api-elem dev ok">
